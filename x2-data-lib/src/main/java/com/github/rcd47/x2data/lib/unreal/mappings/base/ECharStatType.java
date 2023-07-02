@@ -1,0 +1,35 @@
+package com.github.rcd47.x2data.lib.unreal.mappings.base;
+
+public enum ECharStatType {
+	
+	eStat_Invalid,
+	eStat_UtilityItems,
+	eStat_HP,
+	eStat_Offense,
+	eStat_Defense,
+	eStat_Mobility,
+	eStat_Will,
+	eStat_Hacking,
+	eStat_SightRadius,
+	eStat_FlightFuel,
+	eStat_AlertLevel,
+	eStat_BackpackSize,
+	eStat_Dodge,
+	eStat_ArmorChance,
+	eStat_ArmorMitigation,      
+	eStat_ArmorPiercing,
+	eStat_PsiOffense,
+	eStat_HackDefense,
+	eStat_DetectionRadius, 
+	eStat_DetectionModifier,
+	eStat_CritChance,
+	eStat_Strength,
+	eStat_SeeMovement,
+	eStat_HearingRadius,
+	eStat_CombatSims,
+	eStat_FlankingCritChance,
+	eStat_ShieldHP,
+	eStat_Job,
+	eStat_FlankingAimBonus,
+	
+}
