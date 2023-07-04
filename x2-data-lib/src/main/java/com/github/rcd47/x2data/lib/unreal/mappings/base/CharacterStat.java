@@ -8,6 +8,5 @@ public class CharacterStat {
 	public float CurrentValue;
 	public float MaxValue;
 	public List<Float> StatModAmounts;
-	public List<StateObjectReference> StatMods;
 	
 }

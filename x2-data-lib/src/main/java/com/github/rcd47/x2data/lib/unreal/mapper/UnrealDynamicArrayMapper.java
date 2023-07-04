@@ -1,18 +1,17 @@
 package com.github.rcd47.x2data.lib.unreal.mapper;
 
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 
 class UnrealDynamicArrayMapper implements IUnrealFieldMapper {
 	
 	private List<Object> currentValue;
-	private Deque<IUnrealFieldMapper> mapperStack;
+	private UnrealObjectMapperContext context;
 	private IUnrealFieldMapperFactory elementMapperFactory;
 	private int remaining;
 
-	UnrealDynamicArrayMapper(Deque<IUnrealFieldMapper> mapperStack, IUnrealFieldMapperFactory elementMapperFactory) {
-		this.mapperStack = mapperStack;
+	UnrealDynamicArrayMapper(UnrealObjectMapperContext context, IUnrealFieldMapperFactory elementMapperFactory) {
+		this.context = context;
 		this.elementMapperFactory = elementMapperFactory;
 	}
 
@@ -20,7 +19,7 @@ class UnrealDynamicArrayMapper implements IUnrealFieldMapper {
 	public void up(Object value) {
 		currentValue.add(value);
 		if (--remaining > 0) {
-			mapperStack.push(elementMapperFactory.create(mapperStack, elementMapperFactory.createDefaultValue()));
+			context.mapperStack.push(elementMapperFactory.create(context, elementMapperFactory.createDefaultValue()));
 		}
 	}
 
@@ -29,15 +28,15 @@ class UnrealDynamicArrayMapper implements IUnrealFieldMapper {
 		currentValue = new ArrayList<>(size);
 		if (size != 0) {
 			// for dynamic arrays, individual entries are not delta'd
-			mapperStack.push(elementMapperFactory.create(mapperStack, elementMapperFactory.createDefaultValue()));
+			context.mapperStack.push(elementMapperFactory.create(context, elementMapperFactory.createDefaultValue()));
 			remaining = size;
 		}
 	}
 
 	@Override
 	public void visitDynamicArrayEnd() {
-		mapperStack.pop();
-		mapperStack.peek().up(currentValue);
+		context.mapperStack.pop();
+		context.mapperStack.peek().up(currentValue);
 	}
 	
 }

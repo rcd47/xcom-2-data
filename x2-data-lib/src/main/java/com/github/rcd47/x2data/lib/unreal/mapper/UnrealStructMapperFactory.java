@@ -1,26 +1,27 @@
 package com.github.rcd47.x2data.lib.unreal.mapper;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.Deque;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComObjectReference;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealTypeName;
 
 class UnrealStructMapperFactory implements IUnrealFieldMapperFactory {
 	
 	private Class<?> type;
-	private String parserTypeName;
-	private Map<String, UnrealStructField> fields;
+	private UnrealName parserTypeName;
+	private Map<UnrealName, UnrealStructField> fields;
 	
-	static void forType(Class<?> structType, UnrealStructMapperFactory factory, Function<Class<?>, IUnrealFieldMapperFactory> factoryFinder) {
+	static void forType(Class<?> structType, UnrealStructMapperFactory factory, Function<Type, IUnrealFieldMapperFactory> factoryFinder) {
 		factory.type = structType;
 		
 		var nameAnnotation = structType.getAnnotation(UnrealTypeName.class);
-		factory.parserTypeName = nameAnnotation == null ? structType.getSimpleName() : nameAnnotation.value();
+		factory.parserTypeName = new UnrealName(nameAnnotation == null ? structType.getSimpleName() : nameAnnotation.value());
 		
 		factory.fields = new HashMap<>();
 		for (var field : structType.getFields()) {
@@ -33,10 +34,12 @@ class UnrealStructMapperFactory implements IUnrealFieldMapperFactory {
 				var rawType = fieldParameters.getRawType();
 				var typeArgs = fieldParameters.getActualTypeArguments();
 				if (List.class.equals(rawType)) {
-					fieldFactory = new UnrealArrayTypeDetectorFactory(factoryFinder.apply((Class<?>) typeArgs[0]));
+					fieldFactory = new UnrealArrayTypeDetectorFactory(factoryFinder.apply(typeArgs[0]));
 				} else if (Map.class.equals(rawType)) {
 					fieldFactory = new UnrealMapMapperFactory(
-							factoryFinder.apply((Class<?>) typeArgs[0]), factoryFinder.apply((Class<?>) typeArgs[1]));
+							factoryFinder.apply(typeArgs[0]), factoryFinder.apply(typeArgs[1]));
+				} else if (IXComObjectReference.class.isAssignableFrom((Class<?>) rawType)) {
+					fieldFactory = factoryFinder.apply(fieldType);
 				} else {
 					throw new UnsupportedOperationException("Unexpected parameterized raw type " + fieldParameters + " for field " + field);
 				}
@@ -44,13 +47,13 @@ class UnrealStructMapperFactory implements IUnrealFieldMapperFactory {
 				throw new UnsupportedOperationException("Unexpected type " + fieldType + " for field " + field);
 			}
 			
-			factory.fields.put(field.getName().toLowerCase(Locale.ENGLISH), new UnrealStructField(field, fieldFactory));
+			factory.fields.put(new UnrealName(field.getName()), new UnrealStructField(field, fieldFactory));
 		}
 	}
 
 	@Override
-	public IUnrealFieldMapper create(Deque<IUnrealFieldMapper> mapperStack, Object currentValue) {
-		return new UnrealStructMapper(currentValue, mapperStack, fields);
+	public IUnrealFieldMapper create(UnrealObjectMapperContext context, Object currentValue) {
+		return new UnrealStructMapper(currentValue, context, fields);
 	}
 
 	@Override
@@ -72,7 +75,7 @@ class UnrealStructMapperFactory implements IUnrealFieldMapperFactory {
 		}
 	}
 
-	public String getParserTypeName() {
+	public UnrealName getParserTypeName() {
 		return parserTypeName;
 	}
 	

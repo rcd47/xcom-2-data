@@ -1,19 +1,17 @@
 package com.github.rcd47.x2data.lib.unreal.mapper;
 
-import java.util.Deque;
-
 class UnrealByteMapperFactory implements IUnrealFieldMapperFactory {
 
 	static final UnrealByteMapperFactory INSTANCE = new UnrealByteMapperFactory();
 	
 	@Override
-	public IUnrealFieldMapper create(Deque<IUnrealFieldMapper> mapperStack, Object currentValue) {
-		return new UnrealByteMapper(mapperStack);
+	public IUnrealFieldMapper create(UnrealObjectMapperContext context, Object currentValue) {
+		return new UnrealByteMapper(context);
 	}
 
 	static class UnrealByteMapper extends UnrealPrimitiveMapperBase {
-		UnrealByteMapper(Deque<IUnrealFieldMapper> mapperStack) {
-			super(mapperStack);
+		UnrealByteMapper(UnrealObjectMapperContext context) {
+			super(context);
 		}
 
 		@Override

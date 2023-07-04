@@ -1,7 +1,6 @@
 package com.github.rcd47.x2data.lib.unreal.mapper;
 
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 
 class UnrealArrayTypeDetectorFactory implements IUnrealFieldMapperFactory {
@@ -14,8 +13,8 @@ class UnrealArrayTypeDetectorFactory implements IUnrealFieldMapperFactory {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IUnrealFieldMapper create(Deque<IUnrealFieldMapper> mapperStack, Object currentValue) {
-		return new UnrealArrayTypeDetector((List<Object>) currentValue, mapperStack, elementMapperFactory);
+	public IUnrealFieldMapper create(UnrealObjectMapperContext context, Object currentValue) {
+		return new UnrealArrayTypeDetector((List<Object>) currentValue, context, elementMapperFactory);
 	}
 
 	@Override

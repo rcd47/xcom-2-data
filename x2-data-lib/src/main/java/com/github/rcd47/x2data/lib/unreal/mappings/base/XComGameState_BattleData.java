@@ -2,35 +2,30 @@ package com.github.rcd47.x2data.lib.unreal.mappings.base;
 
 import java.util.List;
 
-import com.github.rcd47.x2data.lib.unreal.UnrealDataType;
-import com.github.rcd47.x2data.lib.unreal.mappings.UnrealDataTypeHint;
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComStateObjectReference;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 
 public class XComGameState_BattleData extends XComGameState_BaseObject {
 	
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> ActiveSitReps;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> AlertEventIDs;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> AllowedAbilities;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> AutoLootBucket;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> CarriedOutLootBucket;
+	public List<UnrealName> ActiveSitReps;
+	public List<UnrealName> AlertEventIDs;
+	public List<UnrealName> AllowedAbilities;
+	public List<UnrealName> AutoLootBucket;
+	public List<UnrealName> CarriedOutLootBucket;
 	public DirectTransferInformation DirectTransferInfo;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> DisallowedAbilities;
-	public List<StateObjectReference> FactionHeroesCaptured;
-	public List<StateObjectReference> FactionHeroesHighLevel;
-	public List<StateObjectReference> FactionHeroesKilled;
-	public List<StateObjectReference> FactionHeroesOnMission;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> HighlightedObjectiveAbilities;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> LostSwarmIDs;
+	public List<UnrealName> DisallowedAbilities;
+	public List<UnrealName> HighlightedObjectiveAbilities;
+	public List<UnrealName> LostSwarmIDs;
 	public List<Integer> m_arrSecondWave;
 	public String m_strOpName;
 	public List<Integer> MaxLostSpawnTurnCooldown;
 	public List<Integer> MinLostSpawnTurnCooldown;
-	public List<StateObjectReference> PlayerTurnOrder;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> PopularSupportEventIDs;
-	public List<StateObjectReference> RewardUnitOriginals;
-	public List<StateObjectReference> RewardUnits;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> StrategyHackRewards;
+	// PlayerTurnOrder items can be XCGS_Player or XCGS_AIGroup
+	public List<IXComStateObjectReference<XComGameState_BaseObject>> PlayerTurnOrder;
+	public List<UnrealName> PopularSupportEventIDs;
+	public List<UnrealName> StrategyHackRewards;
 	public List<Integer> TacticalEventGameStates;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> TacticalHackRewards;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> UniqueHackRewardsAcquired;
+	public List<UnrealName> TacticalHackRewards;
+	public List<UnrealName> UniqueHackRewardsAcquired;
 	
 }

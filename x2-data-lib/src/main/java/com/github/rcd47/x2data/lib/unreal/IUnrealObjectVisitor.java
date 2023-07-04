@@ -2,13 +2,11 @@ package com.github.rcd47.x2data.lib.unreal;
 
 import java.nio.ByteBuffer;
 
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
+
 public interface IUnrealObjectVisitor {
 	
-	default boolean normalizePropertyNames() {
-		return true;
-	}
-	
-	default void visitStructStart(String type) {}
+	default void visitStructStart(UnrealName type) {}
 	
 	default void visitStructEnd() {}
 	
@@ -34,13 +32,13 @@ public interface IUnrealObjectVisitor {
 	/**
 	 * Begin visiting a property. The property's value is visited immediately after this.
 	 */
-	default void visitProperty(String propertyName, int staticArrayIndex) {}
+	default void visitProperty(UnrealName propertyName, int staticArrayIndex) {}
 	
 	default void visitBooleanValue(boolean value) {}
 	
 	default void visitByteValue(byte value) {}
 	
-	default void visitEnumValue(String enumType, String value) {}
+	default void visitEnumValue(UnrealName enumType, UnrealName value) {}
 	
 	default void visitFloatValue(float value) {}
 	
@@ -48,25 +46,17 @@ public interface IUnrealObjectVisitor {
 	
 	default void visitIntValue(int value) {}
 	
-	/**
-	 * Called when a name is encountered.
-	 * Note that Unrealscript pools names and treats them as case-insensitive.
-	 * If the same name is used in multiple places with different cases, the actual case used is the case
-	 * from the first time Unrealscript encountered the name (i.e. when the name was added to the pool).
-	 * Therefore, when comparing names, it is strongly recommended to either use {@link String#equalsIgnoreCase(String)}
-	 * or convert all names to the same case using {@link String#toLowerCase(java.util.Locale)}.
-	 */
-	default void visitNameValue(String value) {}
+	default void visitNameValue(UnrealName value) {}
 	
 	default void visitStringValue(String value) {}
 	
-	default void visitBasicDelegateValue(String delegateName, String declaringClass) {}
+	default void visitBasicDelegateValue(UnrealName delegateName, String declaringClass) {}
 	
-	default void visitBasicInterfaceValue(String objectName) {}
+	default void visitBasicInterfaceValue(UnrealName objectName) {}
 	
-	default void visitBasicObjectValue(String objectName) {}
+	default void visitBasicObjectValue(UnrealName objectName) {}
 	
-	default void visitHistoryDelegateValue(int objectIndex, String delegateName, String declaringClass) {}
+	default void visitHistoryDelegateValue(int objectIndex, UnrealName delegateName, String declaringClass) {}
 	
 	default void visitHistoryInterfaceValue(int objectIndex) {}
 	

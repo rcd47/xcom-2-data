@@ -4,10 +4,6 @@ import java.util.List;
 
 public class XComGameState_AlienRulerManager extends XComGameState_BaseObject {
 	
-	public List<StateObjectReference> ActiveAlienRulers;
 	public List<AlienRulerLocation> AlienRulerLocations;
-	public List<StateObjectReference> AllAlienRulers;
-	public List<StateObjectReference> DefeatedAlienRulers;
-	public List<StateObjectReference> EscapedAlienRulers;
 	
 }

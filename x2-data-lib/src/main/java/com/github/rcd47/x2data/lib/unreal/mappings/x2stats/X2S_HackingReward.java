@@ -1,12 +1,11 @@
 package com.github.rcd47.x2data.lib.unreal.mappings.x2stats;
 
-import com.github.rcd47.x2data.lib.unreal.UnrealDataType;
-import com.github.rcd47.x2data.lib.unreal.mappings.UnrealDataTypeHint;
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComNameObjectReference;
+import com.github.rcd47.x2data.lib.unreal.mappings.base.X2HackRewardTemplate;
 
 public class X2S_HackingReward {
 	
-	@UnrealDataTypeHint(UnrealDataType.nameproperty)
-	public String RewardTemplateName; // corresponds to a X2HackRewardTemplate
+	public IXComNameObjectReference<X2HackRewardTemplate> RewardTemplateName;
 	public int ChanceToSucceed;
 	
 }

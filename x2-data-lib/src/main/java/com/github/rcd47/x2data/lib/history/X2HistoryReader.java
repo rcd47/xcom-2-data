@@ -19,6 +19,8 @@ import org.anarres.lzo.lzo_uintp;
 import com.github.rcd47.x2data.lib.unreal.UnrealObjectParser;
 import com.github.rcd47.x2data.lib.unreal.UnrealUtils;
 import com.github.rcd47.x2data.lib.unreal.mapper.UnrealObjectMapper;
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.NullXComObjectReferenceResolver;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.mappings.base.XComGameState_CampaignSettings;
 import com.github.rcd47.x2data.lib.unreal.typings.UnrealTypeInformer;
 import com.github.rcd47.x2data.lib.unreal.typings.UnrealTypingsBuilder;
@@ -26,6 +28,7 @@ import com.google.common.flogger.FluentLogger;
 
 public class X2HistoryReader {
 	
+	private static final UnrealName CAMPAIGN_SETTINGS_NAME = new UnrealName("XComGameState_CampaignSettings");
 	private static final FluentLogger L = FluentLogger.forEnclosingClass();
 	
 	private Set<OpenOption> decompressOpenOptions;
@@ -160,7 +163,7 @@ public class X2HistoryReader {
 				}
 				entries.add(new X2HistoryIndexEntry(
 						i,
-						UnrealUtils.readString(uncompressedBlockBuffer),
+						new UnrealName(UnrealUtils.readString(uncompressedBlockBuffer)),
 						uncompressedBlockBuffer.position(uncompressedBlockBuffer.position() + 12).getInt()));
 			}
 			
@@ -183,7 +186,7 @@ public class X2HistoryReader {
 			var mapper = new UnrealObjectMapper(new UnrealObjectParser(true, new UnrealTypingsBuilder().build(Set.of())));
 			XComGameState_CampaignSettings campaignSettings = null;
 			for (var entry : entries) {
-				if (!entry.getType().equals("XComGameState_CampaignSettings")) {
+				if (!entry.getType().equals(CAMPAIGN_SETTINGS_NAME)) {
 					continue;
 				}
 				
@@ -193,9 +196,9 @@ public class X2HistoryReader {
 				buffer.flip();
 				
 				if (campaignSettings == null) {
-					campaignSettings = mapper.create(XComGameState_CampaignSettings.class, buffer);
+					campaignSettings = mapper.create(XComGameState_CampaignSettings.class, buffer, NullXComObjectReferenceResolver.INSTANCE);
 				} else {
-					campaignSettings = mapper.update(campaignSettings, buffer);
+					campaignSettings = mapper.update(campaignSettings, buffer, NullXComObjectReferenceResolver.INSTANCE);
 				}
 			}
 			

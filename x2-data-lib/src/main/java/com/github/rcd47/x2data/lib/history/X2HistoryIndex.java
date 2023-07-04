@@ -14,19 +14,21 @@ import com.github.rcd47.x2data.lib.unreal.IUnrealObjectVisitor;
 import com.github.rcd47.x2data.lib.unreal.UnrealFileParseException;
 import com.github.rcd47.x2data.lib.unreal.UnrealObjectParser;
 import com.github.rcd47.x2data.lib.unreal.mapper.UnrealObjectMapper;
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComObjectReferenceResolver;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.typings.UnrealTypeInformer;
 
 public class X2HistoryIndex implements Closeable {
 	
 	private FileChannel file;
 	private List<X2HistoryIndexEntry> entries;
-	private Map<String, UnrealTypeInformer> typings;
+	private Map<UnrealName, UnrealTypeInformer> typings;
 	private UnrealObjectParser objectParser;
 	private UnrealObjectMapper objectMapper;
 	private int largestEntrySize;
 	private Deque<ByteBuffer> bufferCache;
 	
-	X2HistoryIndex(FileChannel file, List<X2HistoryIndexEntry> entries, Map<String, UnrealTypeInformer> typings) {
+	X2HistoryIndex(FileChannel file, List<X2HistoryIndexEntry> entries, Map<UnrealName, UnrealTypeInformer> typings) {
 		this.file = file;
 		this.entries = entries;
 		this.typings = typings;
@@ -41,11 +43,12 @@ public class X2HistoryIndex implements Closeable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T mapObject(X2HistoryIndexEntry entry, T previousVersion) throws IOException {
+	public <T> T mapObject(X2HistoryIndexEntry entry, T previousVersion, IXComObjectReferenceResolver refResolver) throws IOException {
 		var buffer = prepareBuffer(entry);
 		try {
 			return previousVersion == null ?
-					(T) objectMapper.create(entry.getMappedType(), buffer) : objectMapper.update(previousVersion, buffer);
+					(T) objectMapper.create(entry.getMappedType(), buffer, refResolver) :
+					objectMapper.update(previousVersion, buffer, refResolver);
 		} catch (Exception e) {
 			throw buildParseException(entry, e);
 		} finally {
@@ -94,7 +97,7 @@ public class X2HistoryIndex implements Closeable {
 		file = null;
 	}
 
-	public Map<String, UnrealTypeInformer> getTypings() {
+	public Map<UnrealName, UnrealTypeInformer> getTypings() {
 		return typings;
 	}
 

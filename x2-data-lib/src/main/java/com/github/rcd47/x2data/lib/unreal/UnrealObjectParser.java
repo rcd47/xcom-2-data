@@ -3,23 +3,23 @@ package com.github.rcd47.x2data.lib.unreal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.typings.UnrealTypeInformer;
 import com.github.rcd47.x2data.lib.unreal.typings.UnrealUntypedPropertyInfo;
 
 public class UnrealObjectParser {
 	
 	private boolean historyFormat;
-	private Map<String, UnrealTypeInformer> typings;
+	private Map<UnrealName, UnrealTypeInformer> typings;
 	
-	public UnrealObjectParser(boolean historyFormat, Map<String, UnrealTypeInformer> typings) {
+	public UnrealObjectParser(boolean historyFormat, Map<UnrealName, UnrealTypeInformer> typings) {
 		this.historyFormat = historyFormat;
 		this.typings = typings;
 	}
 
-	public void parse(String objectType, ByteBuffer buffer, IUnrealObjectVisitor visitor) {
+	public void parse(UnrealName objectType, ByteBuffer buffer, IUnrealObjectVisitor visitor) {
 		// history objects start with an unknown int. seems to always be -1.
 		// BasicSaveObject files have the version passed to BasicSaveObject followed by that same unknown int.
 		buffer.order(ByteOrder.LITTLE_ENDIAN).position(buffer.position() + (historyFormat ? 4 : 8));
@@ -30,7 +30,7 @@ public class UnrealObjectParser {
 		}
 	}
 	
-	private void parseStruct(String objectType, ByteBuffer buffer, IUnrealObjectVisitor visitor, boolean remainingDataIsUnparseable) {
+	private void parseStruct(UnrealName objectType, ByteBuffer buffer, IUnrealObjectVisitor visitor, boolean remainingDataIsUnparseable) {
 		visitor.visitStructStart(objectType);
 		
 		var typeInformer = typings.get(objectType);
@@ -51,26 +51,26 @@ public class UnrealObjectParser {
 		
 		while (buffer.hasRemaining()) {
 			if (untypedProperties == null) {
-				String propertyName = readName(buffer);
+				UnrealName propertyName = readName(buffer);
 				
-				if ("None".equalsIgnoreCase(propertyName)) {
+				if (UnrealName.NONE.equals(propertyName)) {
 					// None is a sentinel value that indicates the end of typed properties in a struct/object
 					// there can be untyped properties after this (e.g. XComGameState_Unit's UnitValues)
 					untypedProperties = typeInformer.untypedProperties.iterator();
 					continue;
 				}
 				
-				UnrealDataType propertyType = UnrealDataType.valueOf(readName(buffer).toLowerCase(Locale.ENGLISH));
+				UnrealDataType propertyType = UnrealDataType.valueOf(readName(buffer).getNormalized());
 				int propertyDataLength = buffer.getInt();
 				int staticArrayIndex = buffer.getInt();
 				
-				visitor.visitProperty(normalizePropertyName(visitor, propertyName), staticArrayIndex);
+				visitor.visitProperty(propertyName, staticArrayIndex);
 				
 				parseValue(propertyType, propertyDataLength, typeInformer.arrayElementTypes.get(propertyName), buffer, visitor, false, false);
 			} else if (untypedProperties.hasNext()) {
 				var propertyInfo = untypedProperties.next();
 				
-				visitor.visitProperty(normalizePropertyName(visitor, propertyInfo.propertyName), 0);
+				visitor.visitProperty(propertyInfo.propertyName, 0);
 				
 				if (propertyInfo.propertyType.equals(Map.class)) {
 					int mapSize = buffer.getInt();
@@ -128,8 +128,8 @@ public class UnrealObjectParser {
 					 * 3) Property is a dynamic array of bytes.
 					 * Other cases require typings and are handled differently, later in this method.
 					 */
-					String enumType;
-					if (forDynamicArrayElement || (enumType = readName(buffer)).equalsIgnoreCase("None")) {
+					UnrealName enumType;
+					if (forDynamicArrayElement || (enumType = readName(buffer)).equals(UnrealName.NONE)) {
 						// really is a byte
 						visitor.visitByteValue(buffer.get());
 					} else {
@@ -176,14 +176,14 @@ public class UnrealObjectParser {
 					try {
 						parseStruct(structType, structBuffer, visitor, !inUntypedProperty && !forDynamicArrayElement);
 					} catch (Exception e) {
-						throw new UnrealFileParseException("Failure reading struct type " + structType, structBuffer.position());
+						throw new UnrealFileParseException("Failure reading struct type " + structType, e, structBuffer.position());
 					}
 					buffer.position(buffer.position() + propertyDataLength);
 					break;
 				default:
 					throw new IllegalStateException("Unsupported type " + unrealType);
 			}
-		} else if (propertyType instanceof String structOrEnumType) {
+		} else if (propertyType instanceof UnrealName structOrEnumType) {
 			var typeInfo = typings.get(structOrEnumType);
 			if (typeInfo.mappedType.isEnum()) {
 				/*
@@ -209,16 +209,8 @@ public class UnrealObjectParser {
 		}
 	}
 	
-	private String readName(ByteBuffer buffer) {
-		return UnrealUtils.readString(buffer, historyFormat);
-	}
-	
-	private String normalizePropertyName(IUnrealObjectVisitor visitor, String propertyName) {
-		// property name uses the Unreal name data type, which is case insensitive
-		// names are pooled, and the name's actual case is determined the first time it's seen
-		// so if the same name appears in different places with different cases, it's hard to say which case will be used
-		// therefore we normalize them by converting to lowercase
-		return visitor.normalizePropertyNames() ? propertyName.toLowerCase(Locale.ENGLISH) : propertyName;
+	private UnrealName readName(ByteBuffer buffer) {
+		return new UnrealName(UnrealUtils.readString(buffer, historyFormat));
 	}
 	
 }

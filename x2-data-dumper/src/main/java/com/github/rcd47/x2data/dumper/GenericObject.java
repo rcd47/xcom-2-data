@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
 
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
+
 import groovy.lang.GroovyObjectSupport;
 import j2html.tags.specialized.TbodyTag;
 import j2html.tags.specialized.TdTag;
@@ -23,8 +25,10 @@ import j2html.tags.specialized.TrTag;
 
 public class GenericObject extends GroovyObjectSupport {
 	
-	public String type;
-	public Map<String, Object> properties = new HashMap<>();
+	private static final UnrealName OBJECT_ID = new UnrealName("ObjectID");
+	
+	public UnrealName type;
+	public Map<UnrealName, Object> properties = new HashMap<>();
 	public ByteBuffer unparseableData;
 	
 	private static enum ChangeType {
@@ -39,7 +43,7 @@ public class GenericObject extends GroovyObjectSupport {
 		}
 	}
 	
-	public GenericObject(String type) {
+	public GenericObject(UnrealName type) {
 		this.type = type;
 	}
 	
@@ -52,7 +56,7 @@ public class GenericObject extends GroovyObjectSupport {
 	
 	@Override
 	public Object getProperty(String propertyName) {
-		return properties.get(propertyName);
+		return properties.get(new UnrealName(propertyName));
 	}
 
 	private static Object deepClone(Object obj) {
@@ -115,14 +119,14 @@ public class GenericObject extends GroovyObjectSupport {
 	private static void dumpInternal(
 			String path, TbodyTag tableBody, GenericObject oldObj, GenericObject newObj, boolean onlyChangedProperties, boolean diff) {
 		ChangeType changeType = oldObj == null ? ChangeType.ADDED : (newObj == null ? ChangeType.DELETED : ChangeType.CHANGED);
-		Map<String, Object> oldProps = changeType == ChangeType.ADDED ? Map.of() : oldObj.properties;
-		Map<String, Object> newProps = changeType == ChangeType.DELETED ? Map.of() : newObj.properties;
+		Map<UnrealName, Object> oldProps = changeType == ChangeType.ADDED ? Map.of() : oldObj.properties;
+		Map<UnrealName, Object> newProps = changeType == ChangeType.DELETED ? Map.of() : newObj.properties;
 		
 		TrTag row = tr();
 		ThTag objectIdCell = null;
 		int initialChildCount = 0;
 		if (path.isEmpty()) {
-			Integer objectId = (Integer) Objects.requireNonNullElse(oldObj, newObj).properties.get("ObjectID");
+			Integer objectId = (Integer) Objects.requireNonNullElse(oldObj, newObj).properties.get(OBJECT_ID);
 			if (objectId != null) { // will be null for context objects
 				initialChildCount = tableBody.getNumChildren();
 				objectIdCell = th(objectId.toString());
@@ -132,9 +136,9 @@ public class GenericObject extends GroovyObjectSupport {
 		
 		row.with(td(path));
 		if (diff) {
-			row.withClass(changeType.rowStyle).with(changeType == ChangeType.ADDED ? td() : td(oldObj.type));
+			row.withClass(changeType.rowStyle).with(changeType == ChangeType.ADDED ? td() : td(oldObj.type.getOriginal()));
 		}
-		row.with(changeType == ChangeType.DELETED ? td() : td(newObj.type));
+		row.with(changeType == ChangeType.DELETED ? td() : td(newObj.type.getOriginal()));
 		tableBody.with(row);
 		
 		dumpProperties(path, tableBody, oldProps, newProps, onlyChangedProperties, diff);
@@ -163,7 +167,8 @@ public class GenericObject extends GroovyObjectSupport {
 				continue;
 			}
 			
-			String pathForKey = path.isEmpty() ? key.toString() : path + "." + key;
+			String keyAsString = key instanceof UnrealName name ? name.getOriginal() : key.toString();
+			String pathForKey = path.isEmpty() ? keyAsString : path + "." + keyAsString;
 			
 			if (newValue instanceof List || oldValue instanceof List) {
 				List<?> newValueList = toList(newValue);

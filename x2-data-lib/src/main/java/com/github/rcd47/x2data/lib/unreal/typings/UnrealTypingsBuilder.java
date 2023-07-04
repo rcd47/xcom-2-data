@@ -21,7 +21,9 @@ import org.jboss.jandex.Type.Kind;
 
 import com.github.rcd47.x2data.lib.savegame.X2SaveGameHeader;
 import com.github.rcd47.x2data.lib.unreal.UnrealDataType;
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComStateObjectReference;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealDataTypeHint;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealTypeName;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealUntypedProperty;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealUntypedStruct;
@@ -35,22 +37,23 @@ public class UnrealTypingsBuilder {
 	private static final DotName UNTYPED_PROPERTY_ANNOTATION = DotName.createSimple(UnrealUntypedProperty.class.getName());
 	private static final DotName UNTYPED_STRUCT_ANNOTATION = DotName.createSimple(UnrealUntypedStruct.class.getName());
 	private static final DotName SINGLETON_STATE_ANNOTATION = DotName.createSimple(XComSingletonStateType.class.getName());
-	private static final Map<String, String> DLC_PACKAGES = Map.ofEntries(
-			Map.entry("CovertInfiltration", "covertinf"),
-			Map.entry("DarkXCOMRedux", "mocx"),
-			Map.entry("GrimHorizonFix", "ghfix"),
-			Map.entry("PauseWorldTime", "pauseworldtime"),
-			Map.entry("X2Statistics", "x2stats"));
+	private static final UnrealName STATE_OBJ_REF_NAME = new UnrealName("StateObjectReference");
+	private static final Map<UnrealName, String> DLC_PACKAGES = Map.ofEntries(
+			Map.entry(new UnrealName("CovertInfiltration"), "covertinf"),
+			Map.entry(new UnrealName("DarkXCOMRedux"), "mocx"),
+			Map.entry(new UnrealName("GrimHorizonFix"), "ghfix"),
+			Map.entry(new UnrealName("PauseWorldTime"), "pauseworldtime"),
+			Map.entry(new UnrealName("X2Statistics"), "x2stats"));
 	
-	public Map<String, UnrealTypeInformer> build(X2SaveGameHeader saveHeader) {
-		return build(saveHeader.installedDlcAndMods.stream().map(d -> d.internalName).collect(Collectors.toSet()));
+	public Map<UnrealName, UnrealTypeInformer> build(X2SaveGameHeader saveHeader) {
+		return build(saveHeader.installedDlcAndMods.stream().map(d -> new UnrealName(d.internalName)).collect(Collectors.toSet()));
 	}
 	
-	public Map<String, UnrealTypeInformer> build(Collection<String> dlcInternalNames) {
+	public Map<UnrealName, UnrealTypeInformer> build(Collection<UnrealName> dlcInternalNames) {
 		// determine which packages to look at
 		Set<String> packagePrefixes = new HashSet<>();
 		packagePrefixes.add(PACKAGE_PREFIX + "base");
-		for (String dlcName : dlcInternalNames) {
+		for (UnrealName dlcName : dlcInternalNames) {
 			var packageName = DLC_PACKAGES.get(dlcName);
 			if (packageName != null) {
 				packagePrefixes.add(PACKAGE_PREFIX + packageName);
@@ -58,6 +61,12 @@ public class UnrealTypingsBuilder {
 		}
 		
 		Map<DotName, UnrealTypeInformer> typings = new HashMap<>();
+		
+		// StateObjectReference is a special case because our field type is an interface instead of a class
+		typings.put(
+				DotName.createSimple(IXComStateObjectReference.class),
+				new UnrealTypeInformer(STATE_OBJ_REF_NAME, IXComStateObjectReference.class, false, false, Map.of(), List.of()));
+		
 		try (var in = getClass().getResourceAsStream("/META-INF/unreal-mappings.idx")) {
 			var index = new IndexReader(in).read();
 			for (var classInfo : index.getKnownClasses()) {
@@ -84,7 +93,7 @@ public class UnrealTypingsBuilder {
 		}
 		
 		List<UnrealUntypedPropertyInfo> untypedProperties = new ArrayList<>();
-		Map<String, Object> arrayElementTypes = new HashMap<>();
+		Map<UnrealName, Object> arrayElementTypes = new HashMap<>();
 		
 		if (!classInfo.isEnum()) {
 			// determine the superclass so we can add its dynamic array info to this class
@@ -133,7 +142,8 @@ public class UnrealTypingsBuilder {
 					}
 					
 					untypedProperties.add(new UnrealUntypedPropertyInfo(
-							untypedPropertyAnnotation.value().asInt(), field.name(), propertyType, arrayElementType, mapKeyType, mapValueType));
+							untypedPropertyAnnotation.value().asInt(), new UnrealName(field.name()),
+							propertyType, arrayElementType, mapKeyType, mapValueType));
 					
 					// even if the type is a dynamic array, we already know everything we need
 					continue;
@@ -143,7 +153,7 @@ public class UnrealTypingsBuilder {
 				// if yes, it may be a dynamic array in Unrealscript, so determine the element type
 				if (fieldType.kind() == Kind.PARAMETERIZED_TYPE && "java.util.List".equals(fieldType.name().toString())) {
 					arrayElementTypes.put(
-							field.name(),
+							new UnrealName(field.name()),
 							determineParseType(classIndex, typings, fieldType.asParameterizedType().arguments().get(0)));
 				}
 			}
@@ -152,7 +162,7 @@ public class UnrealTypingsBuilder {
 		}
 		
 		var typeNameAnnotation = classInfo.declaredAnnotation(TYPE_NAME_ANNOTATION);
-		var unrealTypeName = typeNameAnnotation == null ? dotName.local() : typeNameAnnotation.value().asString();
+		var unrealTypeName = new UnrealName(typeNameAnnotation == null ? dotName.local() : typeNameAnnotation.value().asString());
 		var isSingletonStateType = classInfo.declaredAnnotation(SINGLETON_STATE_ANNOTATION) != null;
 		var isUntypedStruct = classInfo.declaredAnnotation(UNTYPED_STRUCT_ANNOTATION) != null;
 		
@@ -177,6 +187,9 @@ public class UnrealTypingsBuilder {
 			var elementTypeName = elementType.name().toString();
 			if ("java.lang.String".equals(elementTypeName)) {
 				parseDataType = UnrealDataType.strproperty;
+			} else if ("com.github.rcd47.x2data.lib.unreal.mappings.UnrealName".equals(elementTypeName) ||
+					"com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComNameObjectReference".equals(elementTypeName)) {
+				parseDataType = UnrealDataType.nameproperty;
 			} else if ("int".equals(elementTypeName) || "java.lang.Integer".equals(elementTypeName)) {
 				parseDataType = UnrealDataType.intproperty;
 			} else if ("float".equals(elementTypeName) || "java.lang.Float".equals(elementTypeName)) {
@@ -188,6 +201,10 @@ public class UnrealTypingsBuilder {
 			} else if ("double".equals(elementTypeName) || "java.lang.Double".equals(elementTypeName)) {
 				// native vars can be double even though Unrealscript does not have a double type
 				parseDataType = Double.class;
+			} else if ("com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComIndexObjectReference".equals(elementTypeName)) {
+				parseDataType = UnrealDataType.objectproperty;
+			} else if ("com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComStateObjectReference".equals(elementTypeName)) {
+				parseDataType = STATE_OBJ_REF_NAME;
 			} else {
 				// struct or enum
 				parseDataType = buildType(classIndex, typings, classIndex.getClassByName(elementType.name())).unrealTypeName;

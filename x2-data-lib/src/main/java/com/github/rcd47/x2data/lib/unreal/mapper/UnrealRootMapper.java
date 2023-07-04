@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
+
 class UnrealRootMapper<T> implements IUnrealFieldMapper {
 	
 	Deque<IUnrealFieldMapper> mapperStack;
@@ -21,7 +23,7 @@ class UnrealRootMapper<T> implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitStructStart(String type) {
+	public void visitStructStart(UnrealName type) {
 		mapperStack.peek().visitStructStart(type);
 	}
 
@@ -56,7 +58,7 @@ class UnrealRootMapper<T> implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitProperty(String propertyName, int staticArrayIndex) {
+	public void visitProperty(UnrealName propertyName, int staticArrayIndex) {
 		mapperStack.peek().visitProperty(propertyName, staticArrayIndex);
 	}
 
@@ -71,7 +73,7 @@ class UnrealRootMapper<T> implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitEnumValue(String enumType, String value) {
+	public void visitEnumValue(UnrealName enumType, UnrealName value) {
 		mapperStack.peek().visitEnumValue(enumType, value);
 	}
 
@@ -91,7 +93,7 @@ class UnrealRootMapper<T> implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitNameValue(String value) {
+	public void visitNameValue(UnrealName value) {
 		mapperStack.peek().visitNameValue(value);
 	}
 
@@ -101,22 +103,22 @@ class UnrealRootMapper<T> implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitBasicDelegateValue(String delegateName, String declaringClass) {
+	public void visitBasicDelegateValue(UnrealName delegateName, String declaringClass) {
 		mapperStack.peek().visitBasicDelegateValue(delegateName, declaringClass);
 	}
 
 	@Override
-	public void visitBasicInterfaceValue(String objectName) {
+	public void visitBasicInterfaceValue(UnrealName objectName) {
 		mapperStack.peek().visitBasicInterfaceValue(objectName);
 	}
 
 	@Override
-	public void visitBasicObjectValue(String objectName) {
+	public void visitBasicObjectValue(UnrealName objectName) {
 		mapperStack.peek().visitBasicObjectValue(objectName);
 	}
 
 	@Override
-	public void visitHistoryDelegateValue(int objectIndex, String delegateName, String declaringClass) {
+	public void visitHistoryDelegateValue(int objectIndex, UnrealName delegateName, String declaringClass) {
 		mapperStack.peek().visitHistoryDelegateValue(objectIndex, delegateName, declaringClass);
 	}
 

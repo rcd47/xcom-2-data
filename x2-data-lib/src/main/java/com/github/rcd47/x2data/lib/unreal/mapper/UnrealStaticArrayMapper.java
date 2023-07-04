@@ -2,19 +2,20 @@ package com.github.rcd47.x2data.lib.unreal.mapper;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
+
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 
 class UnrealStaticArrayMapper implements IUnrealFieldMapper {
 	
-	private String expectedPropertyName;
+	private UnrealName expectedPropertyName;
 	private List<Object> currentValue;
-	private Deque<IUnrealFieldMapper> mapperStack;
+	private UnrealObjectMapperContext context;
 	private IUnrealFieldMapperFactory elementMapperFactory;
 	private int currentIndex;
 
-	UnrealStaticArrayMapper(String expectedPropertyName, List<Object> currentValue,
-			Deque<IUnrealFieldMapper> mapperStack, IUnrealFieldMapperFactory elementMapperFactory) {
+	UnrealStaticArrayMapper(UnrealName expectedPropertyName, List<Object> currentValue,
+			UnrealObjectMapperContext context, IUnrealFieldMapperFactory elementMapperFactory) {
 		// shallow clone the list
 		// note that we init list fields to empty lists
 		// but we can't know here that empty means it's new. could also mean it's a dynamic array that got emptied.
@@ -22,7 +23,7 @@ class UnrealStaticArrayMapper implements IUnrealFieldMapper {
 		
 		this.expectedPropertyName = expectedPropertyName;
 		this.currentValue = currentValue;
-		this.mapperStack = mapperStack;
+		this.context = context;
 		this.elementMapperFactory = elementMapperFactory;
 	}
 
@@ -35,22 +36,22 @@ class UnrealStaticArrayMapper implements IUnrealFieldMapper {
 	public void visitStructEnd() {
 		// static array was at the end of a struct
 		endOfArray();
-		mapperStack.peek().visitStructEnd();
+		context.mapperStack.peek().visitStructEnd();
 	}
 
 	@Override
 	public void visitUnparseableData(ByteBuffer data) {
 		// static array was at the end of a struct that has unparseable data
 		endOfArray();
-		mapperStack.peek().visitUnparseableData(data);
+		context.mapperStack.peek().visitUnparseableData(data);
 	}
 
 	@Override
-	public void visitProperty(String propertyName, int staticArrayIndex) {
+	public void visitProperty(UnrealName propertyName, int staticArrayIndex) {
 		if (!expectedPropertyName.equals(propertyName)) {
 			// reached the end of the array
 			endOfArray();
-			mapperStack.peek().visitProperty(propertyName, staticArrayIndex);
+			context.mapperStack.peek().visitProperty(propertyName, staticArrayIndex);
 			return;
 		}
 		
@@ -58,12 +59,12 @@ class UnrealStaticArrayMapper implements IUnrealFieldMapper {
 		while (currentValue.size() <= currentIndex) {
 			currentValue.add(elementMapperFactory.createDefaultValue());
 		}
-		mapperStack.push(elementMapperFactory.create(mapperStack, currentValue.get(currentIndex)));
+		context.mapperStack.push(elementMapperFactory.create(context, currentValue.get(currentIndex)));
 	}
 	
 	private void endOfArray() {
-		mapperStack.pop();
-		mapperStack.peek().up(currentValue);
+		context.mapperStack.pop();
+		context.mapperStack.peek().up(currentValue);
 	}
 	
 }

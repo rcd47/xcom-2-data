@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import com.github.rcd47.x2data.lib.unreal.UnrealObjectParser;
 import com.github.rcd47.x2data.lib.unreal.UnrealObjectParserTest;
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.NullXComObjectReferenceResolver;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.mappings.base.ECharStatType;
 import com.github.rcd47.x2data.lib.unreal.mappings.base.ECombatIntelligence;
 import com.github.rcd47.x2data.lib.unreal.mappings.base.EMentalState;
@@ -21,9 +23,14 @@ public class UnrealObjectMapperTest {
 	public void testUnitTemplar() throws Exception {
 		UnrealObjectMapper mapper = new UnrealObjectMapper(new UnrealObjectParser(false, new UnrealTypingsBuilder().build(Set.of())));
 		XComGameState_Unit unit = mapper.create(
-				XComGameState_Unit.class, UnrealObjectParserTest.loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"));
+				XComGameState_Unit.class,
+				UnrealObjectParserTest.loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"),
+				NullXComObjectReferenceResolver.INSTANCE);
 		
 		assertThat(unit).isNotNull();
+		
+		assertThat(unit.m_SoldierClassTemplateName).isNotNull();
+		assertThat(unit.m_SoldierClassTemplateName.name()).isEqualTo(new UnrealName("Templar"));
 		
 		assertThat(unit.m_SoldierProgressionAbilties).hasSize(4);
 		assertThat(unit.m_SoldierProgressionAbilties.get(0).iBranch).isEqualTo(0);
@@ -46,7 +53,7 @@ public class UnrealObjectMapperTest {
 		
 		assertThat(unit.AllSoldierBonds).hasSize(11);
 		assertThat(unit.AllSoldierBonds.get(0).Bondmate).isNotNull();
-		assertThat(unit.AllSoldierBonds.get(0).Bondmate.ObjectID).isEqualTo(410);
+		assertThat(unit.AllSoldierBonds.get(0).Bondmate.id()).isEqualTo(410);
 		assertThat(unit.AllSoldierBonds.get(0).Compatibility).isEqualTo(1.9219538f);
 		assertThat(unit.AllSoldierBonds.get(0).Cohesion).isZero();
 		assertThat(unit.AllSoldierBonds.get(0).BondLevel).isZero();
@@ -57,9 +64,9 @@ public class UnrealObjectMapperTest {
 		
 		assertThat(unit.AbilityTree).hasSize(7);
 		assertThat(unit.AbilityTree.get(0).Abilities).isNotEmpty();
-		assertThat(unit.AbilityTree.get(0).Abilities.get(0).AbilityName).isEqualTo("Rend");
+		assertThat(unit.AbilityTree.get(0).Abilities.get(0).AbilityName).isEqualTo(new UnrealName("Rend"));
 		assertThat(unit.AbilityTree.get(3).Abilities.get(1)).isNotNull();
-		assertThat(unit.AbilityTree.get(3).Abilities.get(1).AbilityName).isEmpty();
+		assertThat(unit.AbilityTree.get(3).Abilities.get(1).AbilityName).isEqualTo(UnrealName.EMPTY);
 		
 		assertThat(unit.strFirstName).isEqualTo("April");
 		
@@ -73,11 +80,11 @@ public class UnrealObjectMapperTest {
 				+ "\n"
 				+ "Geist believes April is one of the more naturally gifted among her many followers. Long before encountering the Templars, April was already manipulating her surroundings with the power of Psionic energy.");
 		
-		assertThat(unit.nmCountry).isEqualTo("Country_Templar");
+		assertThat(unit.nmCountry).isEqualTo(new UnrealName("Country_Templar"));
 		
-		assertThat(unit.UnitValues).containsOnlyKeys("CH_StartMissionWill");
-		assertThat(unit.UnitValues.get("CH_StartMissionWill").eCleanup).isEqualTo(EUnitValueCleanup.eCleanup_Never);
-		assertThat(unit.UnitValues.get("CH_StartMissionWill").fValue).isEqualTo(45);
+		assertThat(unit.UnitValues).containsOnlyKeys(new UnrealName("CH_StartMissionWill"));
+		assertThat(unit.UnitValues.get(new UnrealName("CH_StartMissionWill")).eCleanup).isEqualTo(EUnitValueCleanup.eCleanup_Never);
+		assertThat(unit.UnitValues.get(new UnrealName("CH_StartMissionWill")).fValue).isEqualTo(45);
 	}
 	
 }

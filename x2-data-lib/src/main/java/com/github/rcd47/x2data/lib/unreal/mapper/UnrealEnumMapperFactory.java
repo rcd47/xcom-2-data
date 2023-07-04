@@ -1,6 +1,6 @@
 package com.github.rcd47.x2data.lib.unreal.mapper;
 
-import java.util.Deque;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 
 class UnrealEnumMapperFactory<E extends Enum<E>> implements IUnrealFieldMapperFactory {
 
@@ -13,8 +13,8 @@ class UnrealEnumMapperFactory<E extends Enum<E>> implements IUnrealFieldMapperFa
 	}
 
 	@Override
-	public IUnrealFieldMapper create(Deque<IUnrealFieldMapper> mapperStack, Object currentValue) {
-		return new UnrealEnumMapper<>(mapperStack, type, values);
+	public IUnrealFieldMapper create(UnrealObjectMapperContext context, Object currentValue) {
+		return new UnrealEnumMapper<>(context, type, values);
 	}
 
 	@Override
@@ -26,8 +26,8 @@ class UnrealEnumMapperFactory<E extends Enum<E>> implements IUnrealFieldMapperFa
 		private Class<E> type;
 		private E[] values;
 
-		public UnrealEnumMapper(Deque<IUnrealFieldMapper> mapperStack, Class<E> type, E[] values) {
-			super(mapperStack);
+		public UnrealEnumMapper(UnrealObjectMapperContext context, Class<E> type, E[] values) {
+			super(context);
 			this.type = type;
 			this.values = values;
 		}
@@ -39,9 +39,9 @@ class UnrealEnumMapperFactory<E extends Enum<E>> implements IUnrealFieldMapperFa
 		}
 
 		@Override
-		public void visitEnumValue(String enumType, String value) {
+		public void visitEnumValue(UnrealName enumType, UnrealName value) {
 			// typed properties
-			visitValue(Enum.valueOf(type, value));
+			visitValue(Enum.valueOf(type, value.getOriginal()));
 		}
 	}
 	

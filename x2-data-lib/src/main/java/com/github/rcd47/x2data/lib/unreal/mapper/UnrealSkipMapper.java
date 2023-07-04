@@ -1,15 +1,16 @@
 package com.github.rcd47.x2data.lib.unreal.mapper;
 
 import java.nio.ByteBuffer;
-import java.util.Deque;
+
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 
 class UnrealSkipMapper implements IUnrealFieldMapper {
 	
-	private Deque<IUnrealFieldMapper> mapperStack;
+	private UnrealObjectMapperContext context;
 	private int depth;
 
-	UnrealSkipMapper(Deque<IUnrealFieldMapper> mapperStack) {
-		this.mapperStack = mapperStack;
+	UnrealSkipMapper(UnrealObjectMapperContext context) {
+		this.context = context;
 	}
 
 	private void increaseDepth() {
@@ -18,18 +19,18 @@ class UnrealSkipMapper implements IUnrealFieldMapper {
 	
 	private void decreaseDepth() {
 		if (--depth == 0) {
-			mapperStack.pop();
+			context.mapperStack.pop();
 		}
 	}
 	
 	private void visitValue() {
 		if (depth == 0) {
-			mapperStack.pop();
+			context.mapperStack.pop();
 		}
 	}
 	
 	@Override
-	public void visitStructStart(String type) {
+	public void visitStructStart(UnrealName type) {
 		increaseDepth();
 	}
 
@@ -64,7 +65,7 @@ class UnrealSkipMapper implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitProperty(String propertyName, int staticArrayIndex) {}
+	public void visitProperty(UnrealName propertyName, int staticArrayIndex) {}
 
 	@Override
 	public void visitBooleanValue(boolean value) {
@@ -77,7 +78,7 @@ class UnrealSkipMapper implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitEnumValue(String enumType, String value) {
+	public void visitEnumValue(UnrealName enumType, UnrealName value) {
 		visitValue();
 	}
 
@@ -97,7 +98,7 @@ class UnrealSkipMapper implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitNameValue(String value) {
+	public void visitNameValue(UnrealName value) {
 		visitValue();
 	}
 
@@ -107,22 +108,22 @@ class UnrealSkipMapper implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitBasicDelegateValue(String delegateName, String declaringClass) {
+	public void visitBasicDelegateValue(UnrealName delegateName, String declaringClass) {
 		visitValue();
 	}
 
 	@Override
-	public void visitBasicInterfaceValue(String objectName) {
+	public void visitBasicInterfaceValue(UnrealName objectName) {
 		visitValue();
 	}
 
 	@Override
-	public void visitBasicObjectValue(String objectName) {
+	public void visitBasicObjectValue(UnrealName objectName) {
 		visitValue();
 	}
 
 	@Override
-	public void visitHistoryDelegateValue(int objectIndex, String delegateName, String declaringClass) {
+	public void visitHistoryDelegateValue(int objectIndex, UnrealName delegateName, String declaringClass) {
 		visitValue();
 	}
 

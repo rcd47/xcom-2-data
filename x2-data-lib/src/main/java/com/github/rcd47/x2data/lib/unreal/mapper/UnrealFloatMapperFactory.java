@@ -1,19 +1,17 @@
 package com.github.rcd47.x2data.lib.unreal.mapper;
 
-import java.util.Deque;
-
 class UnrealFloatMapperFactory implements IUnrealFieldMapperFactory {
 
 	static final UnrealFloatMapperFactory INSTANCE = new UnrealFloatMapperFactory();
 	
 	@Override
-	public IUnrealFieldMapper create(Deque<IUnrealFieldMapper> mapperStack, Object currentValue) {
-		return new UnrealFloatMapper(mapperStack);
+	public IUnrealFieldMapper create(UnrealObjectMapperContext context, Object currentValue) {
+		return new UnrealFloatMapper(context);
 	}
 
 	static class UnrealFloatMapper extends UnrealPrimitiveMapperBase {
-		UnrealFloatMapper(Deque<IUnrealFieldMapper> mapperStack) {
-			super(mapperStack);
+		UnrealFloatMapper(UnrealObjectMapperContext context) {
+			super(context);
 		}
 
 		@Override

@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.typings.UnrealTypingsBuilder;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,24 +33,24 @@ public class UnrealObjectParserTest {
 				0x74,0x69,0x6F,0x6E,0x50,0x6F,0x69,0x6E,0x74,0x73,0x5F,0x39,0x00};
 		
 		UnrealObjectParser parser = new UnrealObjectParser(false, Map.of());
-		parser.parse("X2AbilityTemplate", loadFile("/basicSaveObject/X2AbilityTemplate_Overwatch.bin"), visitor);
+		parser.parse(new UnrealName("X2AbilityTemplate"), loadFile("/basicSaveObject/X2AbilityTemplate_Overwatch.bin"), visitor);
 		
 		InOrder inOrder = Mockito.inOrder(visitor);
-		inOrder.verify(visitor).visitStructStart("X2AbilityTemplate");
-		inOrder.verify(visitor).visitProperty("AbilityCosts", 0);
+		inOrder.verify(visitor).visitStructStart(new UnrealName("X2AbilityTemplate"));
+		inOrder.verify(visitor).visitProperty(new UnrealName("AbilityCosts"), 0);
 		inOrder.verify(visitor).visitUnparseableData(ByteBuffer.wrap(abilityCostsBytes));
-		inOrder.verify(visitor).visitProperty("bDontDisplayInAbilitySummary", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("bDontDisplayInAbilitySummary"), 0);
 		inOrder.verify(visitor).visitBooleanValue(true);
-		inOrder.verify(visitor).visitProperty("Hostility", 0);
-		inOrder.verify(visitor).visitEnumValue("EAbilityHostility", "eHostility_Defensive");
-		inOrder.verify(visitor).visitProperty("IconImage", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("Hostility"), 0);
+		inOrder.verify(visitor).visitEnumValue(new UnrealName("EAbilityHostility"), new UnrealName("eHostility_Defensive"));
+		inOrder.verify(visitor).visitProperty(new UnrealName("IconImage"), 0);
 		inOrder.verify(visitor).visitStringValue("img:///UILibrary_PerkIcons.UIPerk_overwatch");
-		inOrder.verify(visitor).visitProperty("ShotHUDPriority", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("ShotHUDPriority"), 0);
 		inOrder.verify(visitor).visitIntValue(200);
-		inOrder.verify(visitor).visitProperty("DataName", 0);
-		inOrder.verify(visitor).visitNameValue("overwatch");
-		inOrder.verify(visitor).visitProperty("ClassThatCreatedUs", 0);
-		inOrder.verify(visitor).visitBasicObjectValue("XComGame.X2Ability_DefaultAbilitySet");
+		inOrder.verify(visitor).visitProperty(new UnrealName("DataName"), 0);
+		inOrder.verify(visitor).visitNameValue(new UnrealName("overwatch"));
+		inOrder.verify(visitor).visitProperty(new UnrealName("ClassThatCreatedUs"), 0);
+		inOrder.verify(visitor).visitBasicObjectValue(new UnrealName("XComGame.X2Ability_DefaultAbilitySet"));
 		inOrder.verify(visitor, never()).visitUnparseableData(any());
 		inOrder.verify(visitor).visitStructEnd();
 	}
@@ -57,58 +58,58 @@ public class UnrealObjectParserTest {
 	@Test
 	public void testStaticArrayIndexAndNestedStruct() throws Exception {
 		UnrealObjectParser parser = new UnrealObjectParser(false, Map.of());
-		parser.parse("XComGameState_Unit", loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"), visitor);
+		parser.parse(new UnrealName("XComGameState_Unit"), loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"), visitor);
 		
 		InOrder inOrder = Mockito.inOrder(visitor);
-		inOrder.verify(visitor).visitProperty("CharacterStats", 28);
-		inOrder.verify(visitor).visitStructStart("CharacterStat");
-		inOrder.verify(visitor).visitProperty("Type", 0);
-		inOrder.verify(visitor).visitEnumValue("ECharStatType", "eStat_FlankingAimBonus");
-		inOrder.verify(visitor).visitProperty("CachedMaxValueIsCurrent", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("CharacterStats"), 28);
+		inOrder.verify(visitor).visitStructStart(new UnrealName("CharacterStat"));
+		inOrder.verify(visitor).visitProperty(new UnrealName("Type"), 0);
+		inOrder.verify(visitor).visitEnumValue(new UnrealName("ECharStatType"), new UnrealName("eStat_FlankingAimBonus"));
+		inOrder.verify(visitor).visitProperty(new UnrealName("CachedMaxValueIsCurrent"), 0);
 		inOrder.verify(visitor).visitBooleanValue(true);
 		inOrder.verify(visitor).visitStructEnd();
-		inOrder.verify(visitor).visitProperty("ComInt", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("ComInt"), 0);
 	}
 	
 	@Test
 	public void testDynamicArray() throws Exception {
 		UnrealObjectParser parser = new UnrealObjectParser(false, new UnrealTypingsBuilder().build(Set.of()));
-		parser.parse("XComGameState_Unit", loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"), visitor);
+		parser.parse(new UnrealName("XComGameState_Unit"), loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"), visitor);
 		
 		InOrder inOrder = Mockito.inOrder(visitor);
-		inOrder.verify(visitor).visitProperty("m_SoldierProgressionAbilties", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("m_SoldierProgressionAbilties"), 0);
 		inOrder.verify(visitor).visitDynamicArrayStart(4);
-		inOrder.verify(visitor).visitStructStart("SCATProgression");
+		inOrder.verify(visitor).visitStructStart(new UnrealName("SCATProgression"));
 		inOrder.verify(visitor).visitStructEnd();
-		inOrder.verify(visitor).visitStructStart("SCATProgression");
-		inOrder.verify(visitor).visitProperty("iBranch", 0);
+		inOrder.verify(visitor).visitStructStart(new UnrealName("SCATProgression"));
+		inOrder.verify(visitor).visitProperty(new UnrealName("iBranch"), 0);
 		inOrder.verify(visitor).visitIntValue(1);
 		inOrder.verify(visitor).visitStructEnd();
-		inOrder.verify(visitor).visitStructStart("SCATProgression");
-		inOrder.verify(visitor).visitProperty("iBranch", 0);
+		inOrder.verify(visitor).visitStructStart(new UnrealName("SCATProgression"));
+		inOrder.verify(visitor).visitProperty(new UnrealName("iBranch"), 0);
 		inOrder.verify(visitor).visitIntValue(2);
 		inOrder.verify(visitor).visitStructEnd();
-		inOrder.verify(visitor).visitStructStart("SCATProgression");
-		inOrder.verify(visitor).visitProperty("iBranch", 0);
+		inOrder.verify(visitor).visitStructStart(new UnrealName("SCATProgression"));
+		inOrder.verify(visitor).visitProperty(new UnrealName("iBranch"), 0);
 		inOrder.verify(visitor).visitIntValue(4);
 		inOrder.verify(visitor).visitStructEnd();
 		inOrder.verify(visitor).visitDynamicArrayEnd();
-		inOrder.verify(visitor).visitProperty("m_SoldierRank", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("m_SoldierRank"), 0);
 	}
 	
 	@Test
 	public void testUntypedDataAtEndOfStruct() throws Exception {
 		UnrealObjectParser parser = new UnrealObjectParser(false, new UnrealTypingsBuilder().build(Set.of()));
-		parser.parse("XComGameState_Unit", loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"), visitor);
+		parser.parse(new UnrealName("XComGameState_Unit"), loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"), visitor);
 		
 		InOrder inOrder = Mockito.inOrder(visitor);
-		inOrder.verify(visitor).visitProperty("UnitValues", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("UnitValues"), 0);
 		inOrder.verify(visitor).visitMapStart(1);
-		inOrder.verify(visitor).visitNameValue("CH_StartMissionWill");
-		inOrder.verify(visitor).visitStructStart("UnitValue");
-		inOrder.verify(visitor).visitProperty("fValue", 0);
+		inOrder.verify(visitor).visitNameValue(new UnrealName("CH_StartMissionWill"));
+		inOrder.verify(visitor).visitStructStart(new UnrealName("UnitValue"));
+		inOrder.verify(visitor).visitProperty(new UnrealName("fValue"), 0);
 		inOrder.verify(visitor).visitFloatValue(45);
-		inOrder.verify(visitor).visitProperty("eCleanup", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("eCleanup"), 0);
 		inOrder.verify(visitor).visitByteValue((byte) 2);
 		inOrder.verify(visitor).visitStructEnd();
 		inOrder.verify(visitor).visitMapEnd();
@@ -119,7 +120,7 @@ public class UnrealObjectParserTest {
 	@Test
 	public void testUnparseableDataAtEndOfStruct() throws Exception {
 		UnrealObjectParser parser = new UnrealObjectParser(false, Map.of());
-		parser.parse("XComGameState_Unit", loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"), visitor);
+		parser.parse(new UnrealName("XComGameState_Unit"), loadFile("/basicSaveObject/XCGS_Unit_Templar.bin"), visitor);
 		
 		var unparseableBytes = new byte[] {
 				0x01,0x00,0x00,0x00,0x14,0x00,0x00,0x00,0x43,0x48,0x5F,0x53,0x74,0x61,0x72,0x74,0x4D,0x69,0x73,0x73,0x69,0x6F,0x6E,
@@ -134,14 +135,14 @@ public class UnrealObjectParserTest {
 	@Test
 	public void testDynamicArrayOfEnum() throws Exception {
 		UnrealObjectParser parser = new UnrealObjectParser(true, new UnrealTypingsBuilder().build(Set.of()));
-		parser.parse("AbilityResultContext", loadFile("/x2hist/AbilityResultContext.bin"), visitor);
+		parser.parse(new UnrealName("AbilityResultContext"), loadFile("/x2hist/AbilityResultContext.bin"), visitor);
 		
 		InOrder inOrder = Mockito.inOrder(visitor);
-		inOrder.verify(visitor).visitProperty("MultiTargetHitResults", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("MultiTargetHitResults"), 0);
 		inOrder.verify(visitor).visitDynamicArrayStart(1);
-		inOrder.verify(visitor).visitEnumValue("EAbilityHitResult", "eHit_Success");
+		inOrder.verify(visitor).visitEnumValue(new UnrealName("EAbilityHitResult"), new UnrealName("eHit_Success"));
 		inOrder.verify(visitor).visitDynamicArrayEnd();
-		inOrder.verify(visitor).visitProperty("MultiTargetEffectResults", 0);
+		inOrder.verify(visitor).visitProperty(new UnrealName("MultiTargetEffectResults"), 0);
 	}
 	
 	public static ByteBuffer loadFile(String path) throws IOException {

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.rcd47.x2data.lib.unreal.IUnrealObjectVisitor;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 
 public class GenericObjectVisitor implements IUnrealObjectVisitor {
 	
@@ -28,12 +29,7 @@ public class GenericObjectVisitor implements IUnrealObjectVisitor {
 	}
 
 	@Override
-	public boolean normalizePropertyNames() {
-		return false;
-	}
-
-	@Override
-	public void visitStructStart(String type) {
+	public void visitStructStart(UnrealName type) {
 		if (objectStack.isEmpty()) {
 			rootObject = rootObject == null ? new GenericObject(type) : rootObject.deepClone();
 			objectStack.push(rootObject);
@@ -99,7 +95,7 @@ public class GenericObjectVisitor implements IUnrealObjectVisitor {
 	}
 
 	@Override
-	public void visitProperty(String propertyName, int staticArrayIndex) {
+	public void visitProperty(UnrealName propertyName, int staticArrayIndex) {
 		var state = stateStack.pop();
 		if (state != VisitorState.PROPERTY_NAME) {
 			throw new IllegalStateException("Unexpected state: " + state);
@@ -120,8 +116,8 @@ public class GenericObjectVisitor implements IUnrealObjectVisitor {
 	}
 
 	@Override
-	public void visitEnumValue(String enumType, String value) {
-		visitValue(value);
+	public void visitEnumValue(UnrealName enumType, UnrealName value) {
+		visitValue(value.getOriginal());
 	}
 
 	@Override
@@ -140,8 +136,8 @@ public class GenericObjectVisitor implements IUnrealObjectVisitor {
 	}
 
 	@Override
-	public void visitNameValue(String value) {
-		visitValue(value);
+	public void visitNameValue(UnrealName value) {
+		visitValue(value.getOriginal());
 	}
 
 	@Override
@@ -150,22 +146,22 @@ public class GenericObjectVisitor implements IUnrealObjectVisitor {
 	}
 
 	@Override
-	public void visitBasicDelegateValue(String delegateName, String declaringClass) {
-		visitValue(delegateName);
+	public void visitBasicDelegateValue(UnrealName delegateName, String declaringClass) {
+		visitValue(delegateName.getOriginal());
 	}
 
 	@Override
-	public void visitBasicInterfaceValue(String objectName) {
+	public void visitBasicInterfaceValue(UnrealName objectName) {
 		visitValue(objectName);
 	}
 
 	@Override
-	public void visitBasicObjectValue(String objectName) {
-		visitValue(objectName);
+	public void visitBasicObjectValue(UnrealName objectName) {
+		visitValue(objectName.getOriginal());
 	}
 
 	@Override
-	public void visitHistoryDelegateValue(int objectIndex, String delegateName, String declaringClass) {
+	public void visitHistoryDelegateValue(int objectIndex, UnrealName delegateName, String declaringClass) {
 		visitValue(objectIndex);
 	}
 
@@ -206,7 +202,7 @@ public class GenericObjectVisitor implements IUnrealObjectVisitor {
 					list.add(existingValue);
 				}
 				existingValue = list;
-				properties.put((String) nextPropertyOrKey, list);
+				properties.put((UnrealName) nextPropertyOrKey, list);
 			}
 			
 			if (existingValue instanceof List && !(value instanceof List)) {
@@ -216,7 +212,7 @@ public class GenericObjectVisitor implements IUnrealObjectVisitor {
 				}
 				list.set(nextStaticArrayIndex, value);
 			} else {
-				properties.put((String) nextPropertyOrKey, value);
+				properties.put((UnrealName) nextPropertyOrKey, value);
 			}
 			
 			stateStack.push(VisitorState.PROPERTY_NAME);

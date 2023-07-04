@@ -1,19 +1,19 @@
 package com.github.rcd47.x2data.lib.unreal.mapper;
 
-import java.util.Deque;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 
 class UnrealIntegerMapperFactory implements IUnrealFieldMapperFactory {
 
 	static final UnrealIntegerMapperFactory INSTANCE = new UnrealIntegerMapperFactory();
 	
 	@Override
-	public IUnrealFieldMapper create(Deque<IUnrealFieldMapper> mapperStack, Object currentValue) {
-		return new UnrealIntegerMapper(mapperStack);
+	public IUnrealFieldMapper create(UnrealObjectMapperContext context, Object currentValue) {
+		return new UnrealIntegerMapper(context);
 	}
 
 	static class UnrealIntegerMapper extends UnrealPrimitiveMapperBase {
-		UnrealIntegerMapper(Deque<IUnrealFieldMapper> mapperStack) {
-			super(mapperStack);
+		UnrealIntegerMapper(UnrealObjectMapperContext context) {
+			super(context);
 		}
 
 		@Override
@@ -22,7 +22,7 @@ class UnrealIntegerMapperFactory implements IUnrealFieldMapperFactory {
 		}
 
 		@Override
-		public void visitHistoryDelegateValue(int objectIndex, String delegateName, String declaringClass) {
+		public void visitHistoryDelegateValue(int objectIndex, UnrealName delegateName, String declaringClass) {
 			visitValue(objectIndex);
 		}
 

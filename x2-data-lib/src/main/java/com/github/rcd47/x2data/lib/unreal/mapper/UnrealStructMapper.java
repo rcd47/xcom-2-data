@@ -2,18 +2,19 @@ package com.github.rcd47.x2data.lib.unreal.mapper;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.util.Deque;
 import java.util.Map;
+
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 
 class UnrealStructMapper implements IUnrealFieldMapper {
 	
 	private Object struct;
-	private Deque<IUnrealFieldMapper> mapperStack;
-	private Map<String, UnrealStructField> fields;
+	private UnrealObjectMapperContext context;
+	private Map<UnrealName, UnrealStructField> fields;
 	private Field currentField;
 
-	UnrealStructMapper(Object struct, Deque<IUnrealFieldMapper> mapperStack,
-			Map<String, UnrealStructField> fields) {
+	UnrealStructMapper(Object struct, UnrealObjectMapperContext context,
+			Map<UnrealName, UnrealStructField> fields) {
 		try {
 			// shallow clone the object
 			// note that we init struct fields to an empty object, so struct will never be null here
@@ -28,7 +29,7 @@ class UnrealStructMapper implements IUnrealFieldMapper {
 		}
 		
 		this.struct = struct;
-		this.mapperStack = mapperStack;
+		this.context = context;
 		this.fields = fields;
 	}
 
@@ -44,17 +45,17 @@ class UnrealStructMapper implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitProperty(String propertyName, int staticArrayIndex) {
+	public void visitProperty(UnrealName propertyName, int staticArrayIndex) {
 		var fieldInfo = fields.get(propertyName);
 		if (fieldInfo == null) {
-			mapperStack.push(new UnrealSkipMapper(mapperStack));
+			context.mapperStack.push(new UnrealSkipMapper(context));
 			return;
 		}
 		
 		try {
 			currentField = fieldInfo.field;
-			var fieldMapper = fieldInfo.mapperFactory.create(mapperStack, currentField.get(struct));
-			mapperStack.push(fieldMapper);
+			var fieldMapper = fieldInfo.mapperFactory.create(context, currentField.get(struct));
+			context.mapperStack.push(fieldMapper);
 			
 			if (fieldMapper instanceof UnrealArrayTypeDetector) {
 				fieldMapper.visitProperty(propertyName, staticArrayIndex);
@@ -66,12 +67,12 @@ class UnrealStructMapper implements IUnrealFieldMapper {
 	}
 
 	@Override
-	public void visitStructStart(String type) {}
+	public void visitStructStart(UnrealName type) {}
 
 	@Override
 	public void visitStructEnd() {
-		mapperStack.pop();
-		mapperStack.peek().up(struct);
+		context.mapperStack.pop();
+		context.mapperStack.peek().up(struct);
 	}
 
 	@Override

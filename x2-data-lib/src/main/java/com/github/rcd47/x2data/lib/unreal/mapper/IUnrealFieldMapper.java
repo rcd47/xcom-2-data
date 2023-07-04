@@ -3,6 +3,7 @@ package com.github.rcd47.x2data.lib.unreal.mapper;
 import java.nio.ByteBuffer;
 
 import com.github.rcd47.x2data.lib.unreal.IUnrealObjectVisitor;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 
 interface IUnrealFieldMapper extends IUnrealObjectVisitor {
 	
@@ -11,7 +12,7 @@ interface IUnrealFieldMapper extends IUnrealObjectVisitor {
 	}
 
 	@Override
-	default void visitStructStart(String type) {
+	default void visitStructStart(UnrealName type) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -46,7 +47,7 @@ interface IUnrealFieldMapper extends IUnrealObjectVisitor {
 	}
 
 	@Override
-	default void visitProperty(String propertyName, int staticArrayIndex) {
+	default void visitProperty(UnrealName propertyName, int staticArrayIndex) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -61,7 +62,7 @@ interface IUnrealFieldMapper extends IUnrealObjectVisitor {
 	}
 
 	@Override
-	default void visitEnumValue(String enumType, String value) {
+	default void visitEnumValue(UnrealName enumType, UnrealName value) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -81,7 +82,7 @@ interface IUnrealFieldMapper extends IUnrealObjectVisitor {
 	}
 
 	@Override
-	default void visitNameValue(String value) {
+	default void visitNameValue(UnrealName value) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -91,22 +92,22 @@ interface IUnrealFieldMapper extends IUnrealObjectVisitor {
 	}
 
 	@Override
-	default void visitBasicDelegateValue(String delegateName, String declaringClass) {
+	default void visitBasicDelegateValue(UnrealName delegateName, String declaringClass) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	default void visitBasicInterfaceValue(String objectName) {
+	default void visitBasicInterfaceValue(UnrealName objectName) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	default void visitBasicObjectValue(String objectName) {
+	default void visitBasicObjectValue(UnrealName objectName) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	default void visitHistoryDelegateValue(int objectIndex, String delegateName, String declaringClass) {
+	default void visitHistoryDelegateValue(int objectIndex, UnrealName delegateName, String declaringClass) {
 		throw new UnsupportedOperationException();
 	}
 

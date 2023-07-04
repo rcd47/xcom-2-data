@@ -3,54 +3,46 @@ package com.github.rcd47.x2data.lib.unreal.mappings.base;
 import java.util.List;
 import java.util.Map;
 
-import com.github.rcd47.x2data.lib.unreal.UnrealDataType;
-import com.github.rcd47.x2data.lib.unreal.mappings.UnrealDataTypeHint;
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComNameObjectReference;
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComStateObjectReference;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealUntypedProperty;
 
 public class XComGameState_Unit extends XComGameState_BaseObject {
 	
-	public List<StateObjectReference> Abilities;
 	public List<SoldierRankAbilities> AbilityTree;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> AcquiredTraits;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> ActionPoints;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> AffectedByEffectNames;
-	public List<StateObjectReference> AffectedByEffects;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> AlertTraits;
+	public List<UnrealName> AcquiredTraits;
+	public List<UnrealName> ActionPoints;
+	public List<UnrealName> AffectedByEffectNames;
+	public List<UnrealName> AlertTraits;
 	public List<SoldierBond> AllSoldierBonds;
 	public List<AppearanceInfo> AppearanceStore;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> AppliedEffectNames;
-	public List<StateObjectReference> AppliedEffects;
+	public List<UnrealName> AppliedEffectNames;
 	public List<ClassAgnosticAbility> AWCAbilities;
 	public List<CharacterStat> CharacterStats;
-	public StateObjectReference ChosenRef;
+	public IXComStateObjectReference<XComGameState_AdventChosen> ChosenRef;
 	public ECombatIntelligence ComInt;
-	public StateObjectReference ControllingPlayer;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> CuredTraits;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> CurrentHackRewards;
+	public IXComStateObjectReference<XComGameState_Player> ControllingPlayer;
+	public List<UnrealName> CuredTraits;
+	public List<UnrealName> CurrentHackRewards;
 	public List<DamageResult> DamageResults;
 	public List<Integer> EnemiesInteractedWithSinceLastTurn;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> HackRewards;
+	public List<UnrealName> HackRewards;
 	public List<Integer> HackRollMods;
-	public List<StateObjectReference> InventoryItems;
-	public List<StateObjectReference> KillAssists;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> KilledByDamageTypes;
-	public List<StateObjectReference> KilledUnits;
-	@UnrealDataTypeHint(UnrealDataType.nameproperty)
-	public String m_SoldierClassTemplateName;
+	public List<UnrealName> KilledByDamageTypes;
+	public IXComNameObjectReference<X2SoldierClassTemplate> m_SoldierClassTemplateName;
 	public List<SCATProgression> m_SoldierProgressionAbilties;
 	public int m_SoldierRank;
 	public String m_strEpitaph;
-	@UnrealDataTypeHint(UnrealDataType.nameproperty)
-	public String m_TemplateName;
+	public IXComNameObjectReference<X2CharacterTemplate> m_TemplateName;
 	public EMentalState MentalState = EMentalState.eMentalState_Ready; // set in defaultproperties
-	public List<StateObjectReference> MPBaseLoadoutItems;
 	public List<NegativeTraitRecoveryInfo> NegativeTraits;
-	public String nmCountry;
+	public UnrealName nmCountry;
 	public List<EquipmentInfo> OldInventoryItems;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> PendingTraits;
+	public List<UnrealName> PendingTraits;
 	public List<SCATProgression> PsiAbilities;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> ReserveActionPoints;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> SkippedActionPoints;
+	public List<UnrealName> ReserveActionPoints;
+	public List<UnrealName> SkippedActionPoints;
 	public List<SquadmateScore> SoldierRelationships;
 	public String strBackground;
 	public String strFirstName;
@@ -59,8 +51,8 @@ public class XComGameState_Unit extends XComGameState_BaseObject {
 	public TTile TileLocation;
 	public List<TraversalChange> TraversalChanges;
 	@UnrealUntypedProperty(1)
-	public Map<@UnrealDataTypeHint(UnrealDataType.nameproperty) String, XComUnitValue> UnitValues;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> WillEventsActivatedThisMission;
-	public List<@UnrealDataTypeHint(UnrealDataType.nameproperty) String> WorldMessageTraits;
+	public Map<UnrealName, XComUnitValue> UnitValues;
+	public List<UnrealName> WillEventsActivatedThisMission;
+	public List<UnrealName> WorldMessageTraits;
 	
 }

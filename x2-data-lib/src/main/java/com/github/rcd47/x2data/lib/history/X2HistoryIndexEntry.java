@@ -1,16 +1,18 @@
 package com.github.rcd47.x2data.lib.history;
 
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
+
 public class X2HistoryIndexEntry {
 	
 	private int arrayIndex;
-	private String type;
+	private UnrealName type;
 	private int previousVersionIndex;
 	private long position;
 	private int length;
 	private boolean singletonState;
 	private Class<?> mappedType;
 
-	X2HistoryIndexEntry(int arrayIndex, String type, int previousVersionIndex) {
+	X2HistoryIndexEntry(int arrayIndex, UnrealName type, int previousVersionIndex) {
 		this.arrayIndex = arrayIndex;
 		this.type = type;
 		this.previousVersionIndex = previousVersionIndex;
@@ -20,7 +22,7 @@ public class X2HistoryIndexEntry {
 		return arrayIndex;
 	}
 
-	public String getType() {
+	public UnrealName getType() {
 		return type;
 	}
 
