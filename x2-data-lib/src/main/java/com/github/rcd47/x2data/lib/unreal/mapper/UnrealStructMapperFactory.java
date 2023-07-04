@@ -9,7 +9,9 @@ import java.util.function.Function;
 
 import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComObjectReference;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealStaticArraySize;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealTypeName;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealUntypedProperty;
 
 class UnrealStructMapperFactory implements IUnrealFieldMapperFactory {
 	
@@ -17,6 +19,7 @@ class UnrealStructMapperFactory implements IUnrealFieldMapperFactory {
 	private UnrealName parserTypeName;
 	private Map<UnrealName, UnrealStructField> fields;
 	
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	static void forType(Class<?> structType, UnrealStructMapperFactory factory, Function<Type, IUnrealFieldMapperFactory> factoryFinder) {
 		factory.type = structType;
 		
@@ -34,10 +37,22 @@ class UnrealStructMapperFactory implements IUnrealFieldMapperFactory {
 				var rawType = fieldParameters.getRawType();
 				var typeArgs = fieldParameters.getActualTypeArguments();
 				if (List.class.equals(rawType)) {
-					fieldFactory = new UnrealArrayTypeDetectorFactory(factoryFinder.apply(typeArgs[0]));
+					var elementFactory = factoryFinder.apply(typeArgs[0]);
+					var staticSizeAnnotation = field.getAnnotation(UnrealStaticArraySize.class);
+					if (staticSizeAnnotation == null) {
+						fieldFactory = new UnrealDynamicArrayMapperFactory(elementFactory);
+					} else {
+						fieldFactory = new UnrealStaticArrayListMapperFactory(elementFactory, staticSizeAnnotation.value());
+					}
 				} else if (Map.class.equals(rawType)) {
-					fieldFactory = new UnrealMapMapperFactory(
-							factoryFinder.apply(typeArgs[0]), factoryFinder.apply(typeArgs[1]));
+					var valueFactory = factoryFinder.apply(typeArgs[1]);
+					if (field.isAnnotationPresent(UnrealUntypedProperty.class)) {
+						fieldFactory = new UnrealMapMapperFactory(factoryFinder.apply(typeArgs[0]), valueFactory);
+					} else if (typeArgs[0] instanceof Class<?> keyType && keyType.isEnum()) {
+						fieldFactory = new UnrealStaticArrayEnumMapperFactory<>(valueFactory, (Class<Enum>) keyType);
+					} else {
+						throw new UnsupportedOperationException("Unsupported typed map " + fieldType + " for field " + field);
+					}
 				} else if (IXComObjectReference.class.isAssignableFrom((Class<?>) rawType)) {
 					fieldFactory = factoryFinder.apply(fieldType);
 				} else {

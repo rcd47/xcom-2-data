@@ -19,7 +19,7 @@ public class XComGameState_Unit extends XComGameState_BaseObject {
 	public List<AppearanceInfo> AppearanceStore;
 	public List<UnrealName> AppliedEffectNames;
 	public List<ClassAgnosticAbility> AWCAbilities;
-	public List<CharacterStat> CharacterStats;
+	public Map<ECharStatType, CharacterStat> CharacterStats;
 	public IXComStateObjectReference<XComGameState_AdventChosen> ChosenRef;
 	public ECombatIntelligence ComInt;
 	public IXComStateObjectReference<XComGameState_Player> ControllingPlayer;

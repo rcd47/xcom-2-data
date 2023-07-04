@@ -9,6 +9,11 @@ class UnrealByteMapperFactory implements IUnrealFieldMapperFactory {
 		return new UnrealByteMapper(context);
 	}
 
+	@Override
+	public Object createDefaultValue() {
+		return (byte) 0;
+	}
+
 	static class UnrealByteMapper extends UnrealPrimitiveMapperBase {
 		UnrealByteMapper(UnrealObjectMapperContext context) {
 			super(context);

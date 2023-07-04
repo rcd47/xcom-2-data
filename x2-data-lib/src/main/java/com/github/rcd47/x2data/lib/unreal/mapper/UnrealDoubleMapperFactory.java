@@ -9,6 +9,11 @@ class UnrealDoubleMapperFactory implements IUnrealFieldMapperFactory {
 		return new UnrealDoubleMapper(context);
 	}
 
+	@Override
+	public Object createDefaultValue() {
+		return 0.0d;
+	}
+
 	static class UnrealDoubleMapper extends UnrealPrimitiveMapperBase {
 		UnrealDoubleMapper(UnrealObjectMapperContext context) {
 			super(context);

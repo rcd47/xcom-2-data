@@ -9,6 +9,11 @@ class UnrealFloatMapperFactory implements IUnrealFieldMapperFactory {
 		return new UnrealFloatMapper(context);
 	}
 
+	@Override
+	public Object createDefaultValue() {
+		return 0.0f;
+	}
+
 	static class UnrealFloatMapper extends UnrealPrimitiveMapperBase {
 		UnrealFloatMapper(UnrealObjectMapperContext context) {
 			super(context);

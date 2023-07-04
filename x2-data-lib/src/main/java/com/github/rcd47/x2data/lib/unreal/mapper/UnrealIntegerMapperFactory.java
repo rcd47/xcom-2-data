@@ -11,6 +11,11 @@ class UnrealIntegerMapperFactory implements IUnrealFieldMapperFactory {
 		return new UnrealIntegerMapper(context);
 	}
 
+	@Override
+	public Object createDefaultValue() {
+		return 0;
+	}
+
 	static class UnrealIntegerMapper extends UnrealPrimitiveMapperBase {
 		UnrealIntegerMapper(UnrealObjectMapperContext context) {
 			super(context);

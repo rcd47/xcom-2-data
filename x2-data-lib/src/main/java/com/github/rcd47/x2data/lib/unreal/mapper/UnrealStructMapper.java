@@ -57,7 +57,7 @@ class UnrealStructMapper implements IUnrealFieldMapper {
 			var fieldMapper = fieldInfo.mapperFactory.create(context, currentField.get(struct));
 			context.mapperStack.push(fieldMapper);
 			
-			if (fieldMapper instanceof UnrealArrayTypeDetector) {
+			if (fieldMapper instanceof UnrealStaticArrayBaseMapper) {
 				fieldMapper.visitProperty(propertyName, staticArrayIndex);
 			}
 		} catch (Exception e) {

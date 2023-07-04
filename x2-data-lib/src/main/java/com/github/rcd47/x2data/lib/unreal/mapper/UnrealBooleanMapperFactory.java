@@ -9,6 +9,11 @@ class UnrealBooleanMapperFactory implements IUnrealFieldMapperFactory {
 		return new UnrealBooleanMapper(context);
 	}
 
+	@Override
+	public Object createDefaultValue() {
+		return Boolean.FALSE;
+	}
+
 	static class UnrealBooleanMapper extends UnrealPrimitiveMapperBase {
 		UnrealBooleanMapper(UnrealObjectMapperContext context) {
 			super(context);
