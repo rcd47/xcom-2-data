@@ -1,0 +1,38 @@
+== Creating Mappings
+
+Before data can be used in X2Statistics (and x2dd, in some cases), mappings need to be built. PRs are welcome to add new mappings or fix errors in existing ones, both for "core" data that's part of the base game and for data added by mods. But creating a proper mapping can be tricky. This guide explains the rules.
+
+First, you need to find or create the Java class that corresponds to the Unreal struct or class you want to map. These classes must be placed in the appropriate subpackage of `com.github.rcd47.x2data.lib.unreal.mappings`.
+
+* Structs/classes that are part of the base game (or the highlander) go in the `base` subpackage.
+* Structs/classes added by mods go in their own subpackages, where each mod has its own subpackage.
+
+If you're adding support for a new mod, you first need to decide on the subpackage name. Try to pick a name that's short, and that clearly and unambiguously identifies the mod. If in doubt, go with a longer but more specific name. Once you've settled on a name, you need to add it to the `DLC_PACKAGES` Map in `com.github.rcd47.x2data.lib.unreal.typings.UnrealTypingsBuilder`.
+
+If you're adding a mapping for a new struct/class that currently isn't mapped at all, you need to create a new Java class for it.
+
+* By convention, the name of the class on the Java side should be the same as on the Unreal side. But if the name on the Unreal side is very generic, e.g. `Vector`, you should make the Java name more specific and annotate the class with `@UnrealTypeName`.
+* If the struct is declared `native`, then the Java class must be annotated with `@UnrealUntypedStruct`. All fields in the struct must be mapped as if they were declared `native`, which is discussed later in this guide.
+
+Now it's time to start adding the fields you're interested in. Keep in mind that x2-data-lib will skip any fields it doesn't recognize. So if a struct you're interested in has 100 fields but you only care about 3 of them, you don't need to map the other 97.
+
+The name of the field on the Java side must exactly match the name on the Unreal side. Please keep the fields on the Java side organized by alphabetical order.
+
+The type of the field on the Java side depends on the type of the field on the Unreal side, and in some cases, it also depends on the field's purpose:
+
+* `bool`, `byte`, `int`, `float`, and `double` map to the equivalent Java primitives. (But note that `double` is only available in native fields.)
+* `string` maps to `java.lang.String`.
+* `name` usually maps to `com.github.rcd47.x2data.lib.unreal.mappings.UnrealName`, which is a thin wrapper around a `java.lang.String` that handles the fact that the `name` type is case insensitive.
+** In some cases, `name` fields are a poor man's pointer to a `X2DataTemplate`. In that situation, you should map the field using `com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComNameObjectReference` instead. Make the type bound as specific as possible. For example, if the field always contains the name of a `X2WeaponTemplate`, then you should map the field as `IXComNameObjectReference<X2WeaponTemplate>`. But if the field might be a `X2WeaponTemplate` or a `X2ArmorTemplate`, then you should map the field as `IXComNameObjectReference<X2EquipmentTemplate>`, since `X2EquipmentTemplate` is the nearest common ancestor. You should also leave a comment saying which subtypes of `X2EquipmentTemplate` the field might really contain, to help other developers.
+* Dynamic arrays (i.e. `array<X>`) map to `java.util.List<X>`.
+* Static arrays (i.e. `X[N]`) depend on what `N` is.
+** If `N` is `SomeEnum.EnumCount`, the field maps to `java.util.Map<SomeEnum, X>`.
+** Otherwise, it maps to `java.util.List<X>`, and must be annotated with `@UnrealStaticArraySize`.
+* Enums map to a Java `enum` type. The names of the enum values on the Java side must exactly match the names on the Unreal side. All values must be mapped, and must be declared in the same order.
+* `StateObjectReference` maps to `com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComStateObjectReference`. Follow the same rules as for template names above when determining the type bound.
+* Structs (other than `StateObjectReference`) map to their matching Java class.
+* Object references can only be mapped when they are part of a file created by `BasicSaveObject`, and even then, only the name of the object is available, not the object itself. These fields are usually not worth mapping, but the name can be useful in rare situations, in which case they should be mapped to `IXComNameObjectReference<Void>`.
+* `Map_Mirror {TMap[K, V]}` (only available in native fields) maps to `java.util.Map<K, V>`.
+
+Fields that are declared `native` must be annotated with `@UnrealUntypedProperty`. The ordering of the properties is the order they are declared on the Unreal side, in all cases I have looked at.
+
