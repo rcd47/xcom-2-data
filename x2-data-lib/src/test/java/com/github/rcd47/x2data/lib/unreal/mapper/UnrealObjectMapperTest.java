@@ -45,9 +45,9 @@ public class UnrealObjectMapperTest {
 		assertThat(unit.m_SoldierRank).isEqualTo(1);
 		
 		assertThat(unit.CharacterStats).hasSize(29);
-		assertThat(unit.CharacterStats.get(ECharStatType.eStat_HP.ordinal()).BaseMaxValue).isEqualTo(6);
-		assertThat(unit.CharacterStats.get(ECharStatType.eStat_HP.ordinal()).CurrentValue).isEqualTo(6);
-		assertThat(unit.CharacterStats.get(ECharStatType.eStat_HP.ordinal()).MaxValue).isEqualTo(6);
+		assertThat(unit.CharacterStats.get(ECharStatType.eStat_HP).BaseMaxValue).isEqualTo(6);
+		assertThat(unit.CharacterStats.get(ECharStatType.eStat_HP).CurrentValue).isEqualTo(6);
+		assertThat(unit.CharacterStats.get(ECharStatType.eStat_HP).MaxValue).isEqualTo(6);
 		
 		assertThat(unit.AcquiredTraits).isEmpty();
 		
