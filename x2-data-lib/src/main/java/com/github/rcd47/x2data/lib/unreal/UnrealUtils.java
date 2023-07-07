@@ -14,21 +14,26 @@ public class UnrealUtils {
 	
 	public static String readString(ByteBuffer buffer, boolean hasExtraInt) {
 		Charset charset = StandardCharsets.ISO_8859_1;
+		int nullTerminatorLength = 1;
 		int length = buffer.getInt();
 		if (length == 0) {
 			// have actually seen StrProperty with length 0
 			return "";
 		}
 		if (length < 0) {
-			// not totally sure about this logic
-			// several sources say negative length means Unicode, but haven't seen any actual examples to confirm
-			// also not sure if UTF-16 is the correct encoding but several sources mention UTF-16 in relation to Unreal
-			charset = StandardCharsets.UTF_16;
-			length = -length;
+			// negative length means UTF-16LE
+			// not sure whether the length is number of code units or number of chars
+			// assuming code units (a code unit is exactly 2 bytes) for now
+			charset = StandardCharsets.UTF_16LE;
+			length = -length * 2;
+			nullTerminatorLength = 2;
 		}
-		byte[] strBytes = new byte[length - 1];
+		byte[] strBytes = new byte[length - nullTerminatorLength];
 		buffer.get(strBytes);
-		buffer.position(buffer.position() + (hasExtraInt ? 5 : 1)); // ignore null terminator and maybe the extra int
+		buffer.position(buffer.position() + nullTerminatorLength);
+		if (hasExtraInt) {
+			buffer.position(buffer.position() + 4);
+		}
 		return new String(strBytes, charset);
 	}
 	
