@@ -21,9 +21,7 @@ public class UnrealUtils {
 			return "";
 		}
 		if (length < 0) {
-			// negative length means UTF-16LE
-			// not sure whether the length is number of code units or number of chars
-			// assuming code units (a code unit is exactly 2 bytes) for now
+			// negative length means UTF-16LE, and it's the number of code units (not bytes or chars)
 			charset = StandardCharsets.UTF_16LE;
 			length = -length * 2;
 			nullTerminatorLength = 2;
