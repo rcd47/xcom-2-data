@@ -56,6 +56,12 @@ public class Main implements Callable<Integer> {
 					"Match single-target abilities against a given target: context.InputContext?.PrimaryTarget?.ObjectID = 2315"
 			})
 	private String historyFilter;
+	@Option(names = {"-d", "--decompressedFile"},
+			description = {
+					"When dumping history, save the decompressed file here.",
+					"If not specified, a temporary file will be used and deleted afterwards."
+			})
+	private Path decompressedFile;
 	
 	@Override
 	public Integer call() throws Exception {
@@ -97,7 +103,17 @@ public class Main implements Callable<Integer> {
 					new SaveHeaderDumper().dumpHeader(in, body);
 					// deliberate fall-through
 				case HISTORY:
-					new HistoryFileDumper().dumpHistory(in, body, !dumpAllProperties, historyFilter);
+					boolean decompressedFileIsTemp = decompressedFile == null;
+					if (decompressedFileIsTemp) {
+						decompressedFile = Files.createTempFile("x2hist-decompress-", null);
+					}
+					try {
+						new HistoryFileDumper().dumpHistory(in, decompressedFile, body, !dumpAllProperties, historyFilter);
+					} finally {
+						if (decompressedFileIsTemp) {
+							Files.deleteIfExists(decompressedFile);
+						}
+					}
 					break;
 				default:
 					throw new IllegalArgumentException("Unsupported file type " + inputFileType);

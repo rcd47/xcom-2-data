@@ -17,6 +17,8 @@ import static j2html.TagCreator.ul;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,8 +58,13 @@ public class HistoryFileDumper {
 	private static final UnrealName RESUME_INDEX = new UnrealName("ResumeHistoryIndex");
 	private static final UnrealName INTERRUPTED_SELF = new UnrealName("HistoryIndexInterruptedBySelf");
 	
-	public void dumpHistory(FileChannel in, BodyTag body, boolean onlyChangedProperties, String filter) throws IOException {
-		X2HistoryIndex historyIndex = new X2HistoryReader().buildIndex(in);
+	public void dumpHistory(FileChannel in, Path decompressedFile, BodyTag body, boolean onlyChangedProperties, String filter) throws IOException {
+		var reader = new X2HistoryReader();
+		FileChannel decompressedIn = FileChannel.open(
+				decompressedFile, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
+		reader.decompress(in, decompressedIn);
+		
+		X2HistoryIndex historyIndex = reader.buildIndex(decompressedIn);
 		
 		XComGameStateHistory history = historyIndex.mapObject(historyIndex.getEntry(0), null, NullXComObjectReferenceResolver.INSTANCE);
 		
