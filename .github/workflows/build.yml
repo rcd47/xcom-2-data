@@ -1,0 +1,29 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch code
+        uses: actions/checkout@v4.2.2
+      - name: Set up JDK
+        uses: actions/setup-java@v4.5.0
+        with:
+          java-version: '22'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Run Maven
+        run: mvn -B -e -f x2-data-parent/pom.xml clean package
+      - name: Upload distribution zip
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: 'dist-zip'
+          path: 'x2-data-explorer/target/x2-data-explorer-*-distribution.zip'
+          if-no-files-found: 'error'
+          compression-level: '0'

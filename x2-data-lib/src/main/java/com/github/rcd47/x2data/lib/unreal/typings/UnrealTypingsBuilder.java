@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
@@ -22,6 +23,7 @@ import org.jboss.jandex.Type.Kind;
 import com.github.rcd47.x2data.lib.savegame.X2SaveGameHeader;
 import com.github.rcd47.x2data.lib.unreal.UnrealDataType;
 import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComStateObjectReference;
+import com.github.rcd47.x2data.lib.unreal.mappings.UnrealBasicSaveObject;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealDataTypeHint;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealTypeName;
@@ -45,6 +47,16 @@ public class UnrealTypingsBuilder {
 			Map.entry(new UnrealName("PauseWorldTime"), "pauseworldtime"),
 			Map.entry(new UnrealName("X2Statistics"), "x2stats"));
 	
+	public Map<UnrealName, UnrealTypeInformer> buildBasicSaveObjects() {
+		return build(index -> {
+			// Jandex does not take @Inherited into account, so we must look for subclasses manually
+			var bsoRoots = index.getAnnotations(UnrealBasicSaveObject.class);
+			return Stream.concat(
+					bsoRoots.stream().map(a -> a.target().asClass()),
+					bsoRoots.stream().flatMap(a -> index.getAllKnownSubclasses(a.target().asClass().name()).stream()));
+		});
+	}
+	
 	public Map<UnrealName, UnrealTypeInformer> build(X2SaveGameHeader saveHeader) {
 		return build(saveHeader.installedDlcAndMods.stream().map(d -> new UnrealName(d.internalName)).collect(Collectors.toSet()));
 	}
@@ -60,6 +72,13 @@ public class UnrealTypingsBuilder {
 			}
 		}
 		
+		return build(index -> index
+				.getKnownClasses()
+				.stream()
+				.filter(c -> packagePrefixes.stream().anyMatch(p -> c.name().toString().startsWith(p))));
+	}
+	
+	private Map<UnrealName, UnrealTypeInformer> build(Function<Index, Stream<ClassInfo>> typePicker) {
 		Map<DotName, UnrealTypeInformer> typings = new HashMap<>();
 		
 		// StateObjectReference is a special case because our field type is an interface instead of a class
@@ -69,13 +88,7 @@ public class UnrealTypingsBuilder {
 		
 		try (var in = getClass().getResourceAsStream("/META-INF/unreal-mappings.idx")) {
 			var index = new IndexReader(in).read();
-			for (var classInfo : index.getKnownClasses()) {
-				var dotName = classInfo.name();
-				var className = dotName.toString();
-				if (packagePrefixes.stream().anyMatch(p -> className.startsWith(p))) {
-					buildType(index, typings, classInfo);
-				}
-			}
+			typePicker.apply(index).forEach(classInfo -> buildType(index, typings, classInfo));
 		} catch (IOException e) {
 			// should never happen
 			throw new UncheckedIOException(e);

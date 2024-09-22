@@ -5,5 +5,6 @@ public enum EUnitValueCleanup {
 	eCleanup_BeginTurn,
 	eCleanup_BeginTactical,
 	eCleanup_Never,
+	eCleanup_BeginTacticalChain,
 	
 }

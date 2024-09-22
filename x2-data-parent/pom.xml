@@ -8,26 +8,38 @@
 	<packaging>pom</packaging>
 	
 	<modules>
-		<module>../x2-data-dumper</module>
+		<module>../x2-data-explorer</module>
 		<module>../x2-data-lib</module>
 	</modules>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>20</maven.compiler.source>
-		<maven.compiler.target>20</maven.compiler.target>
+		<maven.compiler.release>22</maven.compiler.release>
 		
-		<version.com.google.flogger>0.7.4</version.com.google.flogger>
-		<version.io.smallrye.jandex>3.1.1</version.io.smallrye.jandex>
+		<version.io.smallrye.jandex>3.2.2</version.io.smallrye.jandex>
 	</properties>
 	
 	<dependencyManagement>
 		<dependencies>
 			<!-- BOMs -->
 			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>2.17.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-bom</artifactId>
+				<version>2.24.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-bom</artifactId>
-				<version>5.3.1</version>
+				<version>5.14.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -41,29 +53,14 @@
 
 			<!-- Third-party deps -->
 			<dependency>
-				<groupId>com.google.flogger</groupId>
-				<artifactId>flogger</artifactId>
-				<version>${version.com.google.flogger}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.flogger</groupId>
-				<artifactId>flogger-system-backend</artifactId>
-				<version>${version.com.google.flogger}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.j2html</groupId>
-				<artifactId>j2html</artifactId>
-				<version>1.6.0</version>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>33.3.0-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.15</version>
-			</dependency>
-			<dependency>
-				<groupId>info.picocli</groupId>
-				<artifactId>picocli</artifactId>
-				<version>4.7.4</version>
+				<version>1.17.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.anarres.lzo</groupId>
@@ -73,7 +70,12 @@
 			<dependency>
 				<groupId>org.apache.groovy</groupId>
 				<artifactId>groovy</artifactId>
-				<version>4.0.12</version>
+				<version>4.0.23</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-controls</artifactId>
+				<version>23</version>
 			</dependency>
 			<dependency>
 				<groupId>io.smallrye</groupId>
@@ -85,13 +87,13 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>3.24.2</version>
+				<version>3.26.3</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-engine</artifactId>
-				<version>5.9.3</version>
+				<version>5.11.1</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
@@ -103,32 +105,32 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.11.0</version>
+					<version>3.13.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.4.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.8.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.7.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.4.0</version>
+					<version>3.6.0</version>
 				</plugin>
 				<plugin>
 					<groupId>io.smallrye</groupId>
@@ -136,16 +138,18 @@
 					<version>${version.io.smallrye.jandex}</version>
 				</plugin>
 				<plugin>
-					<groupId>com.github.akman</groupId>
-					<artifactId>jlink-maven-plugin</artifactId>
-					<version>0.1.11</version>
-				</plugin>
-				<plugin>
 					<groupId>org.panteleyev</groupId>
 					<artifactId>jpackage-maven-plugin</artifactId>
-					<version>1.6.0</version>
+					<version>1.6.4</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
+	
+	<licenses>
+		<license>
+			<name>GPL-3.0-or-later</name>
+			<url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+		</license>
+	</licenses>
 </project>

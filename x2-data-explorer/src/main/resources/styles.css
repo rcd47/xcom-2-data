@@ -1,0 +1,19 @@
+.unparseableData {
+	-fx-text-fill: orange;
+}
+
+/*
+Fix hyperlinks in cells in selected rows being invisible.
+https://bugs.openjdk.org/browse/JDK-8282090
+*/
+.cell:selected .hyperlink,
+.cell:selected .hyperlink:hover,
+.cell:selected .hyperlink:hover:visited,
+.tree-table-row-cell:selected .hyperlink,
+.table-row-cell:selected .hyperlink,
+.tree-table-row-cell:selected .hyperlink:hover,
+.table-row-cell:selected .hyperlink:hover,
+.tree-table-row-cell:selected .hyperlink:hover:visited,
+.table-row-cell:selected .hyperlink:hover:visited {
+    -fx-text-fill: -fx-text-background-color;
+}

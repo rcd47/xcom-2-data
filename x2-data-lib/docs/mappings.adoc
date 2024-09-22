@@ -1,6 +1,6 @@
 == Creating Mappings
 
-Before data can be used in X2Statistics (and x2dd, in some cases), mappings need to be built. PRs are welcome to add new mappings or fix errors in existing ones, both for "core" data that's part of the base game and for data added by mods. But creating a proper mapping can be tricky. This guide explains the rules.
+Before data can be used in X2Statistics (and X2 Data Explorer, in some cases), mappings need to be built. PRs are welcome to add new mappings or fix errors in existing ones, both for "core" data that's part of the base game and for data added by mods. But creating a proper mapping can be tricky. This guide explains the rules.
 
 First, you need to find or create the Java class that corresponds to the Unreal struct or class you want to map. These classes must be placed in the appropriate subpackage of `com.github.rcd47.x2data.lib.unreal.mappings`.
 
@@ -12,7 +12,7 @@ If you're adding support for a new mod, you first need to decide on the subpacka
 If you're adding a mapping for a new struct/class that currently isn't mapped at all, you need to create a new Java class for it.
 
 * By convention, the name of the class on the Java side should be the same as on the Unreal side. But if the name on the Unreal side is very generic, e.g. `Vector`, you should make the Java name more specific and annotate the class with `@UnrealTypeName`.
-* If the struct is declared `native`, then the Java class must be annotated with `@UnrealUntypedStruct`. All fields in the struct must be mapped as if they were declared `native`, which is discussed later in this guide.
+* Some structs are serialized in an untyped manner, in which case the Java class must be annotated with `@UnrealUntypedStruct`. All fields in the struct must be mapped as if they were declared `native`, which is discussed later in this guide. It's not entirely clear what causes a struct to be untyped, but my current speculation is that the struct either must be declared `immutable` or the struct must be used in a field that is declared `native`.
 
 Now it's time to start adding the fields you're interested in. Keep in mind that x2-data-lib will skip any fields it doesn't recognize. So if a struct you're interested in has 100 fields but you only care about 3 of them, you don't need to map the other 97.
 

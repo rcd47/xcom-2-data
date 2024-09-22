@@ -63,4 +63,8 @@ public class UnrealName implements Comparable<UnrealName> {
 		return "UnrealName [original=" + original + ", normalized=" + normalized + "]";
 	}
 	
+	public static UnrealName from(Object object) {
+		return object instanceof UnrealName n ? n : new UnrealName(object.toString());
+	}
+	
 }

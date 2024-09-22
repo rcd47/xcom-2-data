@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns="https://logging.apache.org/xml/ns"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://logging.apache.org/xml/ns https://logging.apache.org/xml/ns/log4j-config-2.xsd">
+
+	<Appenders>
+		<RollingFile name="FILE" filePattern="${sys:user.home}/.x2-data-explorer/logs/%i.log.txt">
+			<PatternLayout pattern="%date %-5level [%logger] (%thread) %message%n%xException%n"/>
+			<DirectWriteRolloverStrategy maxFiles="5"/>
+			<OnStartupTriggeringPolicy />
+		</RollingFile>
+	</Appenders>
+
+	<Loggers>
+		<Root level="INFO">
+			<AppenderRef ref="FILE" />
+		</Root>
+	</Loggers>
+
+</Configuration>

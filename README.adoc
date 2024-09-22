@@ -1,0 +1,28 @@
+= X2 Data Project
+
+_Liberating your XCOM 2 campaign data from the Unreal Engine since 2024._
+
+== Goal
+
+This project provides parsers for various types of files that are created by XCOM 2, and produces the X2 Data Explorer application to help navigate those files. It is also the foundation for the (currently unreleased and very alpha) X2Statistics project.
+
+== Capabilities
+
+x2-data-lib can parse:
+
+* Save files
+* .x2hist files (used for saving ladder progress, and also by X2Statistics)
+* BasicSaveObject files
+* Photobooth database files
+
+X2 Data Explorer can load the first three of the above. See the link:x2-data-explorer/docs/user-guide.adoc[User Guide] for more details.
+
+== Contributing
+
+PRs are welcome, especially to add more link:x2-data-lib/docs/mappings.adoc[mappings]. Use tabs for indentation, and put curly braces on the same line as the control statement.
+
+This project uses Maven as its build system. You can build everything by running `mvn clean package` inside the `x2-data-parent` project.
+
+== License
+
+All parts of the X2 Data Project are licensed under GPL 3.0 or later.

@@ -9,5 +9,6 @@ public class X2SoldierClassTemplate extends X2DataTemplate {
 	public List<String> RankIcons;
 	public List<String> RankNames;
 	public List<String> ShortNames; // rank abbreviations
+	public List<SoldierClassRank> SoldierRanks;
 	
 }
