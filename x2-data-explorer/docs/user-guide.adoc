@@ -23,7 +23,7 @@ After loading one of these files, the tab will contain two sub-tabs: the <<gener
 [#general-tab]
 === General Tab
 
-image::save-general-tab.png[]
+image::save-general-tab.PNG[]
 
 For a save file, the General tab contains four sections:
 
@@ -37,7 +37,7 @@ For a history file, the General tab is mostly the same, except the list of mods 
 [#frames-tab]
 === Frames Tab
 
-image::frames-tab.png[]
+image::frames-tab.PNG[]
 
 The Frames tab shows the entire game state history since the last time the history was archived. It's divided into four sections.
 
