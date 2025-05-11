@@ -135,7 +135,7 @@ public class UnrealObjectParserTest {
 	@Test
 	public void testDynamicArrayOfEnum() throws Exception {
 		UnrealObjectParser parser = new UnrealObjectParser(true, new UnrealTypingsBuilder().build(Set.of()));
-		parser.parse(new UnrealName("AbilityResultContext"), loadFile("/basicSaveObject/AbilityResultContext.bin"), visitor);
+		parser.parse(new UnrealName("AbilityResultContext"), loadFile("/hist-snippets/AbilityResultContext.bin"), visitor);
 		
 		InOrder inOrder = Mockito.inOrder(visitor);
 		inOrder.verify(visitor).visitProperty(new UnrealName("MultiTargetHitResults"), 0);

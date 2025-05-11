@@ -8,6 +8,6 @@ public class XComGameStateHistory {
 	
 	public int CurrRandomSeed;
 	public List<IXComIndexObjectReference<XComGameState>> History;
-	public int NumArchivedFrames;
+	public int NumArchivedFrames; // does not exist pre-WOTC
 	
 }

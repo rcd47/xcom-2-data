@@ -48,8 +48,13 @@ public class HistoryFileReader {
 				
 				XComGameStateHistory history = historyIndex.mapObject(historyIndex.getEntry(0), null, NullXComObjectReferenceResolver.INSTANCE);
 				int numFrames = history.History.size();
+				boolean foundFirstFrame = historyIndex.isCreatedByWOTC();
 				for (int i = 0; i < numFrames; i++) {
 					var frameRef = history.History.get(i);
+					if (!foundFirstFrame && frameRef.index() == -1) {
+						// before WOTC, NumArchivedFrames did not exist and archived frames were represented by -1 in the History array
+						continue;
+					}
 					XComGameState rawFrame = historyIndex.mapObject(
 							historyIndex.getEntry(frameRef.index()), null, NullXComObjectReferenceResolver.INSTANCE);
 					var parsedFrame = new HistoryFrame(rawFrame.HistoryIndex, rawFrame.TimeStamp);
