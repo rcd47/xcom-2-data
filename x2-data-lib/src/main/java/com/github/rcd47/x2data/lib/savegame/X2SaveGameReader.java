@@ -125,7 +125,7 @@ public class X2SaveGameReader {
 		header.campaignNumber = buffer.getInt();
 		header.saveSlot = buffer.getInt();
 		header.description = UnrealUtils.readString(buffer);
-		header.creationTime = LocalDateTime.parse(UnrealUtils.readString(buffer), DateTimeFormatter.ofPattern("M/d/y\nHH:mm"));
+		header.creationTime = LocalDateTime.parse(UnrealUtils.readString(buffer), DateTimeFormatter.ofPattern("M/d/y\nH:mm"));
 		header.mapCommand = UnrealUtils.readString(buffer);
 		header.tacticalSave = buffer.getInt() == 1;
 		header.ironmanEnabled = buffer.getInt() == 1;
