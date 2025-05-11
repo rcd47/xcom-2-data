@@ -13,7 +13,7 @@ jobs:
       - name: Fetch code
         uses: actions/checkout@v4.2.2
       - name: Set up JDK
-        uses: actions/setup-java@v4.5.0
+        uses: actions/setup-java@v4.7.1
         with:
           java-version: '22'
           distribution: 'temurin'
@@ -21,7 +21,7 @@ jobs:
       - name: Run Maven
         run: mvn -B -e -f x2-data-parent/pom.xml clean package
       - name: Upload distribution zip
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: 'dist-zip'
           path: 'x2-data-explorer/target/x2-data-explorer-*-distribution.zip'
