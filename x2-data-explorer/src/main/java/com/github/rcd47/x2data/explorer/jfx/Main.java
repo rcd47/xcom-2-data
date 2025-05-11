@@ -24,6 +24,7 @@ import com.github.rcd47.x2data.explorer.file.NonVersionedField;
 import com.github.rcd47.x2data.explorer.jfx.ui.NonVersionedFieldUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.history.HistoryFramesUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.history.HistoryGeneralUI;
+import com.github.rcd47.x2data.explorer.jfx.ui.history.HistoryProblemsUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.prefs.GeneralPreferences;
 import com.github.rcd47.x2data.explorer.jfx.ui.prefs.GeneralPreferencesUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.prefs.ScriptPreferenceUI;
@@ -385,11 +386,24 @@ public class Main extends Application {
 					var framesTab = new Tab(HistoryFileTab.FRAMES.getTabTitle(), new HistoryFramesUI(history).getNode());
 					framesTab.setClosable(false);
 					
-					var defaultTab = header == null ?
-							GeneralPreferences.getEffective().getHistoryFileDefaultTab() : GeneralPreferences.getEffective().getSaveFileDefaultTab();
+					var problemsCount = history.getProblems().size();
+					var problemsTab = new Tab(
+							HistoryFileTab.PROBLEMS.getTabTitle() + " (" + problemsCount + ")", new HistoryProblemsUI(history).getNode());
+					problemsTab.setClosable(false);
+					if (problemsCount > 0) {
+						problemsTab.getStyleClass().add("historyProblemsFound");
+					}
 					
-					var tabPane = new TabPane(generalTab, framesTab);
-					tabPane.getSelectionModel().select(defaultTab.get() == HistoryFileTab.GENERAL ? generalTab : framesTab);
+					var defaultTabConfig = header == null ?
+							GeneralPreferences.getEffective().getHistoryFileDefaultTab() : GeneralPreferences.getEffective().getSaveFileDefaultTab();
+					var defaultTab = switch (defaultTabConfig.get()) {
+						case FRAMES -> framesTab;
+						case GENERAL -> generalTab;
+						case PROBLEMS -> problemsTab;
+					};
+					
+					var tabPane = new TabPane(generalTab, framesTab, problemsTab);
+					tabPane.getSelectionModel().select(defaultTab);
 					
 					return tabPane;
 				} finally {

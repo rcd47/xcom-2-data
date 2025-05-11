@@ -9,12 +9,14 @@ public class HistoryFile {
 	private final XComGameStateHistory history;
 	private final List<HistoryFrame> frames;
 	private final List<HistorySingletonObject> singletons;
+	private final List<HistoryFileProblem> problems;
 	
-	public HistoryFile(XComGameStateHistory history, List<HistoryFrame> frames,
-			List<HistorySingletonObject> singletons) {
+	public HistoryFile(XComGameStateHistory history, List<HistoryFrame> frames, List<HistorySingletonObject> singletons,
+			List<HistoryFileProblem> problems) {
 		this.history = history;
 		this.frames = frames;
 		this.singletons = singletons;
+		this.problems = problems;
 	}
 
 	public XComGameStateHistory getHistory() {
@@ -27,6 +29,10 @@ public class HistoryFile {
 
 	public List<HistorySingletonObject> getSingletons() {
 		return singletons;
+	}
+
+	public List<HistoryFileProblem> getProblems() {
+		return problems;
 	}
 	
 }

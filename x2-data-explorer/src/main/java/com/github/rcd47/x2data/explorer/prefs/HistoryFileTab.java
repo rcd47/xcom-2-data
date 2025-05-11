@@ -4,6 +4,7 @@ public enum HistoryFileTab {
 	
 	GENERAL("General"),
 	FRAMES("Frames"),
+	PROBLEMS("Problems"),
 	;
 	
 	private final String tabTitle;
