@@ -18,7 +18,7 @@ Multiple files can be loaded at the same time. Each file will be in a separate t
 
 Save files are produced when you save a regular game. History files are produced when you save a ladder game. Save and history files have the same format and work the same way, except that save files have an additional header with some extra information. Both file types contain the entire game state history since the last time the history was archived (which occurs during each map transition).
 
-After loading one of these files, the tab will contain two sub-tabs: the <<general-tab>> and the <<frames-tab>>.
+After loading one of these files, the tab will contain three sub-tabs: the <<general-tab>>, the <<frames-tab>>, and the <<problems-tab>>.
 
 [#general-tab]
 === General Tab
@@ -82,6 +82,15 @@ IMPORTANT: When writing expressions to match fields that are Unreal names, remem
 ==== Context and Object Summaries
 
 The frames and objects tables have a summary column that provides a short description of what that frame or object is about. The summaries are powered by Groovy scripts. Default scripts are included in the application, but can be modified if you like. In the Preferences menu at the top of the screen, click the State Object Summary Script or Context Summary Script menu items to edit the scripts.
+
+[#problems-tab]
+=== Problems Tab
+
+image::problems-tab.png[]
+
+The Problems tab shows a list of problems detected in the file. The number on the tab indicates the number of problems found. If any problems were found, the tab's text will be red to draw attention to it.
+
+It's easy for modders to make mistakes when writing code. Often, these mistakes are subtle and hard to detect. The Problems tab helps to highlight such mistakes so they can be fixed.
 
 [#bso-files]
 == BasicSaveObject Files
