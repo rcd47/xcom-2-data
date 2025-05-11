@@ -2,6 +2,10 @@
 	-fx-text-fill: orange;
 }
 
+.historyProblemsFound .tab-label {
+	-fx-text-fill: red;
+}
+
 /*
 Fix hyperlinks in cells in selected rows being invisible.
 https://bugs.openjdk.org/browse/JDK-8282090
