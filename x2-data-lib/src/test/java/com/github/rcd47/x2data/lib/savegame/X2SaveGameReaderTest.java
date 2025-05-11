@@ -87,7 +87,7 @@ public class X2SaveGameReaderTest {
 	
 	@Test
 	public void testVanillaSave() throws Exception {
-		try (FileChannel in = FileChannel.open(Path.of("src/test/resources/savegame/vanilla.sav"), StandardOpenOption.READ)) {
+		try (FileChannel in = FileChannel.open(Path.of("src/test/resources/savegame/vanilla.ignore"), StandardOpenOption.READ)) {
 			var header = new X2SaveGameReader().readHeader(in);
 			
 			assertThat(header.autoSave).isTrue();

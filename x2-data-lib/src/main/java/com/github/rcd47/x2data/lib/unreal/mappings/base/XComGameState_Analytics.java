@@ -10,9 +10,9 @@ import com.github.rcd47.x2data.lib.unreal.mappings.XComSingletonStateType;
 public class XComGameState_Analytics extends XComGameState_BaseObject {
 	
 	@UnrealUntypedProperty(1)
-	public Map<String, Double> AnalyticMap;
+	public Map<String, Double> AnalyticMap; // TODO before WOTC, key was UnrealName instead of String
 	@UnrealUntypedProperty(2)
-	public Map<String, Double> TacticalAnalyticMap;
+	public Map<String, Double> TacticalAnalyticMap; // TODO before WOTC, key was UnrealName instead of String
 	@UnrealUntypedProperty(3)
 	public List<Integer> TacticalAnalyticUnits;
 	

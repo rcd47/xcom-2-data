@@ -66,7 +66,7 @@ public class X2HistoryReader {
 	 * 
 	 * Both X2EventManager and XComGameStateHistory have the following format:
 	 * 1. int: ArchiveFileVersion. Always 845.
-	 * 2. int: ArchiveFileLicenseeVersion. Always 120.
+	 * 2. int: ArchiveFileLicenseeVersion. Always 120 (for WOTC) or 108 (for pre-WOTC).
 	 * 3. int: Number of objects that were saved.
 	 * 4. list of object metadata: One entry for each object that was saved.
 	 * 5. list of objects: The objects that were saved.
@@ -144,8 +144,12 @@ public class X2HistoryReader {
 	 */
 	public X2HistoryIndex buildIndex(FileChannel decompressedIn) throws IOException {
 		try {
+			// check ArchiveFileLicenseeVersion to determine if this file was created by WOTC or not
+			decompressedIn.position(4);
+			decompressedIn.read(intBuffer.position(0));
+			boolean createdByWOTC = intBuffer.getInt(0) == 120;
+			
 			// determine how many objects were written
-			decompressedIn.position(8);
 			decompressedIn.read(intBuffer.position(0));
 			int objectCount = intBuffer.getInt(0);
 			
@@ -207,7 +211,7 @@ public class X2HistoryReader {
 				entry.setSingletonState(entryTyping.isSingletonStateType);
 			}
 			
-			return new X2HistoryIndex(decompressedIn, entries, typings);
+			return new X2HistoryIndex(decompressedIn, createdByWOTC, entries, typings);
 		} catch (IOException | RuntimeException e) {
 			decompressedIn.close();
 			throw e;

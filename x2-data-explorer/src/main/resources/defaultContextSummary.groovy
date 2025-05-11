@@ -6,9 +6,16 @@ if (ctx.ChangeInfo) {
 	return ctx.ChangeInfo.value
 }
 
-// XComGameStateContext_Ability
 if (ctx.InputContext) {
-	return ctx.InputContext.AbilityTemplateName.value.original
+	// XComGameStateContext_Ability
+	if (ctx.ResultContext) {
+		return ctx.InputContext.AbilityTemplateName.value.original
+	}
+	
+	// XComGameStateContext_HeadquartersOrder
+	if (ctx.InputContext.OrderType) {
+		return ctx.InputContext.OrderType.value.original
+	}
 }
 
 // XComGameStateContext_Kismet

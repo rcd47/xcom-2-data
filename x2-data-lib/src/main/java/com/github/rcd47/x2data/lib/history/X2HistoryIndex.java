@@ -21,6 +21,7 @@ import com.github.rcd47.x2data.lib.unreal.typings.UnrealTypeInformer;
 public class X2HistoryIndex implements Closeable {
 	
 	private FileChannel file;
+	private boolean createdByWOTC;
 	private List<X2HistoryIndexEntry> entries;
 	private Map<UnrealName, UnrealTypeInformer> typings;
 	private UnrealObjectParser objectParser;
@@ -28,8 +29,9 @@ public class X2HistoryIndex implements Closeable {
 	private int largestEntrySize;
 	private Deque<ByteBuffer> bufferCache;
 	
-	X2HistoryIndex(FileChannel file, List<X2HistoryIndexEntry> entries, Map<UnrealName, UnrealTypeInformer> typings) {
+	X2HistoryIndex(FileChannel file, boolean createdByWOTC, List<X2HistoryIndexEntry> entries, Map<UnrealName, UnrealTypeInformer> typings) {
 		this.file = file;
+		this.createdByWOTC = createdByWOTC;
 		this.entries = entries;
 		this.typings = typings;
 		objectParser = new UnrealObjectParser(true, typings);
@@ -95,6 +97,10 @@ public class X2HistoryIndex implements Closeable {
 	public void close() throws IOException {
 		file.close();
 		file = null;
+	}
+
+	public boolean isCreatedByWOTC() {
+		return createdByWOTC;
 	}
 
 	public Map<UnrealName, UnrealTypeInformer> getTypings() {
