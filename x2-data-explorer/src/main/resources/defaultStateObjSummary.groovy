@@ -8,7 +8,13 @@ if (gso.m_TemplateName && gso.OwnerStateObject) {
 
 // XComGameState_Effect and subclasses
 if (gso.ApplyEffectParameters) {
-	return gso.ApplyEffectParameters.EffectRef.SourceTemplateName.value.original +
+	def source;
+	if (gso.ApplyEffectParameters.EffectRef.SourceTemplateName) {
+		source = gso.ApplyEffectParameters.EffectRef.SourceTemplateName.value.original
+	} else {
+		source = gso.ApplyEffectParameters.EffectRef.LookupType.value.original
+	}
+	return source +
 			' by ' +
 			gso.ApplyEffectParameters.SourceStateObjectRef.ObjectID.value +
 			' on ' +

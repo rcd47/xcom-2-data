@@ -1,11 +1,13 @@
 package com.github.rcd47.x2data.explorer.file;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.mappings.base.EInterruptionStatus;
+import com.google.common.base.Throwables;
 
 import groovy.lang.Script;
 
@@ -24,7 +26,8 @@ public class GameStateContext {
 	private final HistoryFrame interruptedByThis;
 	private HistoryFrame resumedBy;
 	
-	public GameStateContext(GenericObject object, HistoryFrame frame, Map<Integer, HistoryFrame> frames, Script summarizer) {
+	public GameStateContext(GenericObject object, HistoryFrame frame, Map<Integer, HistoryFrame> frames, Script summarizer,
+			List<HistoryFileProblem> problemsDetected) {
 		this.frame = frame;
 		
 		type = object.type;
@@ -37,8 +40,16 @@ public class GameStateContext {
 				.map(s -> EInterruptionStatus.valueOf(((UnrealName) s.getValue()).getOriginal()))
 				.orElse(EInterruptionStatus.eInterruptionStatus_None);
 		
-		summarizer.getBinding().setProperty("ctx", this);
-		summary = (String) summarizer.run();
+		String summaryTemp;
+		try {
+			summarizer.getBinding().setProperty("ctx", this);
+			summaryTemp = (String) summarizer.run();
+		} catch (Exception e) {
+			summaryTemp = "";
+			problemsDetected.add(new HistoryFileProblem(
+					frame, this, null, "Summary script failed. Stack trace:\n" + Throwables.getStackTraceAsString(e)));
+		}
+		summary = summaryTemp;
 		
 		var resumedFromIndex = fields.get(INTERRUPTION_HISTORY_INDEX);
 		if (resumedFromIndex == null) {
