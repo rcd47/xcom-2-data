@@ -23,7 +23,7 @@ public class ExpressionFilter<T> {
 		input.setOnAction(_ -> {
 			var text = input.getText();
 			if (Strings.isNullOrEmpty(text)) {
-				combiner.setFilter(combinerIndex, v -> true);
+				combiner.setFilter(combinerIndex, _ -> true);
 				setBackgroundColor(null);
 			} else {
 				try {

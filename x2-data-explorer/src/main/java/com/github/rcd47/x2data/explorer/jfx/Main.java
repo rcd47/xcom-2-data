@@ -302,7 +302,7 @@ public class Main extends Application {
 							.sorted((a, b) -> a.unrealTypeName.compareTo(b.unrealTypeName))
 							.map(t -> t.unrealTypeName)
 							.toList()));
-					typePicker.setCellFactory(v -> {
+					typePicker.setCellFactory(_ -> {
 						var cell = new ListCell<UnrealName>();
 						cell.textProperty().bind(cell.itemProperty().map(UnrealName::getOriginal));
 						return cell;
@@ -447,7 +447,7 @@ public class Main extends Application {
 		text.setFill(Color.RED);
 		
 		var copyMenuItem = new MenuItem("Copy to clipboard");
-		copyMenuItem.setOnAction(event -> {
+		copyMenuItem.setOnAction(_ -> {
 			var content = new ClipboardContent();
 			content.putString(text.getText());
 			Clipboard.getSystemClipboard().setContent(content);

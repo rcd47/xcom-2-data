@@ -12,7 +12,7 @@ public class FilterPredicateCombiner<T> {
 	private final List<Predicate<T>> filters; // would prefer an array but can't create arrays of generic types
 	
 	public FilterPredicateCombiner(int filterCount) {
-		property = new SimpleObjectProperty<>(o -> true);
+		property = new SimpleObjectProperty<>(_ -> true);
 		filters = new ArrayList<>(filterCount);
 		for (int i = 0; i < filterCount; i++) {
 			filters.add(null);
@@ -21,7 +21,7 @@ public class FilterPredicateCombiner<T> {
 	
 	public void setFilter(int index, Predicate<T> filter) {
 		filters.set(index, filter);
-		property.set(filters.stream().filter(f -> f != null).reduce((a, b) -> a.and(b)).orElse(o -> true));
+		property.set(filters.stream().filter(f -> f != null).reduce((a, b) -> a.and(b)).orElse(_ -> true));
 	}
 
 	public SimpleObjectProperty<Predicate<T>> getProperty() {

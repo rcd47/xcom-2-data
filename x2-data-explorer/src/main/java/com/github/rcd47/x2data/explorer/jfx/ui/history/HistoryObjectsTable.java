@@ -45,7 +45,7 @@ public class HistoryObjectsTable {
 		
 		var colId = new TableColumn<GameStateObject, GameStateObject>(HistoryObjectsColumn.ID.getHeaderText());
 		colId.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue()));
-		colId.setCellFactory(c -> new ObjectIdColumnCell());
+		colId.setCellFactory(_ -> new ObjectIdColumnCell());
 		colId.setUserData(HistoryObjectsColumn.ID);
 		columns.put(HistoryObjectsColumn.ID, colId);
 		
@@ -63,13 +63,13 @@ public class HistoryObjectsTable {
 		
 		var colPrev = new TableColumn<GameStateObject, GameStateObject>(HistoryObjectsColumn.PREV_VERSION.getHeaderText());
 		colPrev.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getPreviousVersion()));
-		colPrev.setCellFactory(c -> new GameStateObjectLinkColumnCell());
+		colPrev.setCellFactory(_ -> new GameStateObjectLinkColumnCell());
 		colPrev.setUserData(HistoryObjectsColumn.PREV_VERSION);
 		columns.put(HistoryObjectsColumn.PREV_VERSION, colPrev);
 		
 		var colNext = new TableColumn<GameStateObject, GameStateObject>(HistoryObjectsColumn.NEXT_VERSION.getHeaderText());
 		colNext.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getNextVersion()));
-		colNext.setCellFactory(c -> new GameStateObjectLinkColumnCell());
+		colNext.setCellFactory(_ -> new GameStateObjectLinkColumnCell());
 		colNext.setUserData(HistoryObjectsColumn.NEXT_VERSION);
 		columns.put(HistoryObjectsColumn.NEXT_VERSION, colNext);
 		
@@ -102,7 +102,7 @@ public class HistoryObjectsTable {
 		});
 		
 		var modifiedCheckbox = new CheckBox("Only show modified");
-		modifiedCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+		modifiedCheckbox.selectedProperty().addListener((_, _, newVal) -> {
 			filters.setFilter(1, newVal ? o -> o.getFrame() == framesTable.getSelectionModel().getSelectedItem() : null);
 		});
 		modifiedCheckbox.setSelected(true);
@@ -132,7 +132,7 @@ public class HistoryObjectsTable {
 				},
 				framesTable.getSelectionModel().selectedItemProperty(),
 				filters.getProperty()));
-		objectsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+		objectsTable.getSelectionModel().selectedItemProperty().addListener((_, oldVal, newVal) -> {
 			if (newVal == null) {
 				objectsTable
 						.getItems()
@@ -205,7 +205,7 @@ public class HistoryObjectsTable {
 				setGraphic(null);
 			} else {
 				var link = new Hyperlink(Integer.toString(item.getFrame().getNumber()));
-				link.setOnAction(e -> {
+				link.setOnAction(_ -> {
 					framesTable.getSelectionModel().select(item.getFrame());
 					framesTable.scrollTo(framesTable.getSelectionModel().getSelectedIndex());
 					objectsTable.getSelectionModel().select(item);

@@ -12,7 +12,7 @@ public class AutoResizingTableViewSkin<T> extends TableViewSkin<T> {
 
 	public AutoResizingTableViewSkin(TableView<T> control) {
 		super(control);
-		control.itemsProperty().addListener((obs, oldVal, newVal) -> {
+		control.itemsProperty().addListener((_, _, _) -> {
 			for (var header : getTableHeaderRow().getRootHeader().getColumnHeaders()) {
 				// this whole damn hack is just because resizeColumnToFitContent() is not public
 				// 30 is what TableColumnHeader#updateScene() uses
