@@ -14,9 +14,9 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.release>22</maven.compiler.release>
+		<maven.compiler.release>24</maven.compiler.release>
 		
-		<version.io.smallrye.jandex>3.2.2</version.io.smallrye.jandex>
+		<version.io.smallrye.jandex>3.3.1</version.io.smallrye.jandex>
 	</properties>
 	
 	<dependencyManagement>
@@ -25,28 +25,28 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
-				<version>2.17.2</version>
+				<version>2.19.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-bom</artifactId>
-				<version>2.24.2</version>
+				<version>2.24.3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
-				<version>5.11.1</version>
+				<version>5.12.2</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-bom</artifactId>
-				<version>5.14.0</version>
+				<version>5.18.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -62,12 +62,12 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>33.3.0-jre</version>
+				<version>33.4.8-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.17.1</version>
+				<version>1.18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.anarres.lzo</groupId>
@@ -77,12 +77,12 @@
 			<dependency>
 				<groupId>org.apache.groovy</groupId>
 				<artifactId>groovy</artifactId>
-				<version>4.0.23</version>
+				<version>4.0.26</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openjfx</groupId>
 				<artifactId>javafx-controls</artifactId>
-				<version>23</version>
+				<version>24.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>io.smallrye</groupId>
@@ -94,7 +94,7 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>3.26.3</version>
+				<version>3.27.3</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
@@ -106,12 +106,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.13.0</version>
+					<version>3.14.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.5.0</version>
+					<version>3.5.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -121,7 +121,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.8.0</version>
+					<version>3.8.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -141,7 +141,7 @@
 				<plugin>
 					<groupId>org.panteleyev</groupId>
 					<artifactId>jpackage-maven-plugin</artifactId>
-					<version>1.6.4</version>
+					<version>1.6.6</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
