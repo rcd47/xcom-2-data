@@ -68,19 +68,19 @@ public class HistoryFramesTable {
 		
 		var colResumedFrom = new TableColumn<HistoryFrame, HistoryFrame>(HistoryFramesColumn.RESUMED_FROM.getHeaderText());
 		colResumedFrom.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getContext().getResumedFrom()));
-		colResumedFrom.setCellFactory(c -> new HistoryFrameLinkColumnCell<>());
+		colResumedFrom.setCellFactory(_ -> new HistoryFrameLinkColumnCell<>());
 		colResumedFrom.setUserData(HistoryFramesColumn.RESUMED_FROM);
 		columns.put(HistoryFramesColumn.RESUMED_FROM, colResumedFrom);
 		
 		var colResumedBy = new TableColumn<HistoryFrame, HistoryFrame>(HistoryFramesColumn.RESUMED_BY.getHeaderText());
 		colResumedBy.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getContext().getResumedBy()));
-		colResumedBy.setCellFactory(c -> new HistoryFrameLinkColumnCell<>());
+		colResumedBy.setCellFactory(_ -> new HistoryFrameLinkColumnCell<>());
 		colResumedBy.setUserData(HistoryFramesColumn.RESUMED_BY);
 		columns.put(HistoryFramesColumn.RESUMED_BY, colResumedBy);
 		
 		var colInterruptedByThis = new TableColumn<HistoryFrame, HistoryFrame>(HistoryFramesColumn.INTERRUPTED.getHeaderText());
 		colInterruptedByThis.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getContext().getInterruptedByThis()));
-		colInterruptedByThis.setCellFactory(c -> new HistoryFrameLinkColumnCell<>());
+		colInterruptedByThis.setCellFactory(_ -> new HistoryFrameLinkColumnCell<>());
 		colInterruptedByThis.setUserData(HistoryFramesColumn.INTERRUPTED);
 		columns.put(HistoryFramesColumn.INTERRUPTED, colInterruptedByThis);
 		
@@ -146,7 +146,7 @@ public class HistoryFramesTable {
 				setGraphic(null);
 			} else {
 				var link = new Hyperlink(Integer.toString(item.getNumber()));
-				link.setOnAction(e -> {
+				link.setOnAction(_ -> {
 					var selectionModel = table.getSelectionModel();
 					selectionModel.select(item);
 					table.scrollTo(selectionModel.getSelectedIndex());

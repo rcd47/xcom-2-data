@@ -53,7 +53,7 @@ public class ObjectPropertiesTable {
 		var colName = new TreeTableColumn<GameStateObjectFieldTreeNode, GameStateObjectFieldTreeNode>(
 				ObjectPropertiesColumn.NAME.getHeaderText());
 		colName.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue()));
-		colName.setCellFactory(c -> new ObjectPropertyNameColumnCell());
+		colName.setCellFactory(_ -> new ObjectPropertyNameColumnCell());
 		colName.setUserData(ObjectPropertiesColumn.NAME);
 		columns.put(ObjectPropertiesColumn.NAME, colName);
 		
@@ -87,14 +87,14 @@ public class ObjectPropertiesTable {
 		var colPrevFrame = new TreeTableColumn<GameStateObjectFieldTreeNode, GameStateObjectField>(
 				ObjectPropertiesColumn.PREV_FRAME.getHeaderText());
 		colPrevFrame.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue().getPreviousValue()));
-		colPrevFrame.setCellFactory(c -> new ObjectPropertyFrameLinkColumnCell());
+		colPrevFrame.setCellFactory(_ -> new ObjectPropertyFrameLinkColumnCell());
 		colPrevFrame.setUserData(ObjectPropertiesColumn.PREV_FRAME);
 		columns.put(ObjectPropertiesColumn.PREV_FRAME, colPrevFrame);
 		
 		var colNextFrame = new TreeTableColumn<GameStateObjectFieldTreeNode, GameStateObjectField>(
 				ObjectPropertiesColumn.NEXT_FRAME.getHeaderText());
 		colNextFrame.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue().getNextValue()));
-		colNextFrame.setCellFactory(c -> new ObjectPropertyFrameLinkColumnCell());
+		colNextFrame.setCellFactory(_ -> new ObjectPropertyFrameLinkColumnCell());
 		colNextFrame.setUserData(ObjectPropertiesColumn.NEXT_FRAME);
 		columns.put(ObjectPropertiesColumn.NEXT_FRAME, colNextFrame);
 		
@@ -112,10 +112,10 @@ public class ObjectPropertiesTable {
 				});
 		
 		var expandAll = new Button("Expand All");
-		expandAll.setOnAction(e -> TreeTableUtils.recursiveSetExpanded(table.getRoot(), true));
+		expandAll.setOnAction(_ -> TreeTableUtils.recursiveSetExpanded(table.getRoot(), true));
 		
 		var collapseAll = new Button("Collapse All");
-		collapseAll.setOnAction(e -> TreeTableUtils.recursiveSetExpanded(table.getRoot(), false));
+		collapseAll.setOnAction(_ -> TreeTableUtils.recursiveSetExpanded(table.getRoot(), false));
 		
 		var modifiedCheckbox = new CheckBox("Only show modified");
 		modifiedCheckbox.setSelected(true);
@@ -183,7 +183,7 @@ public class ObjectPropertiesTable {
 				var state = item.getLastChangedAt();
 				var frame = state.getFrame();
 				var link = new Hyperlink(Integer.toString(frame.getNumber()));
-				link.setOnAction(e -> {
+				link.setOnAction(_ -> {
 					var path = new ArrayList<UnrealName>();
 					var treeItem = getTableRow().getTreeItem();
 					while (true) {

@@ -21,11 +21,11 @@ import javafx.util.Duration;
 public class StandardCellFactoryHelper {
 	
 	public static <S> void setFactoryForStringValueColumn(TableColumn<S, String> col) {
-		col.setCellFactory(c -> configureCellForStringValueColumn(new TableCell<>()));
+		col.setCellFactory(_ -> configureCellForStringValueColumn(new TableCell<>()));
 	}
 	
 	public static <S> void setFactoryForStringValueColumn(TreeTableColumn<S, String> col) {
-		col.setCellFactory(c -> configureCellForStringValueColumn(new TreeTableCell<>()));
+		col.setCellFactory(_ -> configureCellForStringValueColumn(new TreeTableCell<>()));
 	}
 	
 	private static <C extends IndexedCell<String>> C configureCellForStringValueColumn(C cell) {
@@ -34,7 +34,7 @@ public class StandardCellFactoryHelper {
 	}
 	
 	public static <S, T> void setFactoryForObjectValueColumn(TreeTableColumn<S, T> col) {
-		col.setCellFactory(c -> {
+		col.setCellFactory(_ -> {
 			var cell = configureCellForValueColumn(new TreeTableCell<S, T>());
 			cell.textProperty().bind(cell.itemProperty().map(value -> {
 				String valueStringified;
@@ -70,7 +70,7 @@ public class StandardCellFactoryHelper {
 		}));
 		
 		var copyMenuItem = new MenuItem("Copy to clipboard");
-		copyMenuItem.setOnAction(event -> {
+		copyMenuItem.setOnAction(_ -> {
 			var content = new ClipboardContent();
 			content.putString(cell.getText());
 			Clipboard.getSystemClipboard().setContent(content);

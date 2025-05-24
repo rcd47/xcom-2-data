@@ -45,10 +45,10 @@ public class NonVersionedFieldUI {
 		VBox.setVgrow(table, Priority.ALWAYS);
 		
 		var expandAll = new Button("Expand All");
-		expandAll.setOnAction(e -> TreeTableUtils.recursiveSetExpanded(table.getRoot(), true));
+		expandAll.setOnAction(_ -> TreeTableUtils.recursiveSetExpanded(table.getRoot(), true));
 		
 		var collapseAll = new Button("Collapse All");
-		collapseAll.setOnAction(e -> TreeTableUtils.recursiveSetExpanded(table.getRoot(), false));
+		collapseAll.setOnAction(_ -> TreeTableUtils.recursiveSetExpanded(table.getRoot(), false));
 		
 		var toolbar = new ToolBar(expandAll, collapseAll);
 		

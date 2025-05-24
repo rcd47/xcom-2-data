@@ -41,7 +41,7 @@ public class MultiSelectMenu<E> extends MenuButton {
 		var selectAllLabel = new Label("Select All");
 		labels.add(selectAllLabel);
 		var selectAllItem = new CustomMenuItem(selectAllLabel, false);
-		selectAllItem.setOnAction(e -> {
+		selectAllItem.setOnAction(_ -> {
 			selectedSet.addAll(options);
 			changeListener.accept(selectedSet);
 			for (var boolProp : selectedOptions) {
@@ -53,7 +53,7 @@ public class MultiSelectMenu<E> extends MenuButton {
 		var clearAllLabel = new Label("Clear All");
 		labels.add(clearAllLabel);
 		var clearAllItem = new CustomMenuItem(clearAllLabel, false);
-		clearAllItem.setOnAction(e -> {
+		clearAllItem.setOnAction(_ -> {
 			selectedSet.clear();
 			changeListener.accept(selectedSet);
 			for (var boolProp : selectedOptions) {
@@ -66,7 +66,7 @@ public class MultiSelectMenu<E> extends MenuButton {
 		
 		for (var option : options) {
 			var boolProp = new SimpleBooleanProperty(false);
-			boolProp.addListener((obs, oldVal, newVal) -> {
+			boolProp.addListener((_, _, newVal) -> {
 				if (newVal) {
 					if (selectedSet.add(option)) {
 						changeListener.accept(selectedSet);
@@ -85,7 +85,7 @@ public class MultiSelectMenu<E> extends MenuButton {
 			labels.add(label);
 			
 			var menuItem = new CustomMenuItem(label, false);
-			menuItem.setOnAction(e -> boolProp.setValue(!boolProp.getValue()));
+			menuItem.setOnAction(_ -> boolProp.setValue(!boolProp.getValue()));
 			
 			items.add(menuItem);
 		}
@@ -100,7 +100,7 @@ public class MultiSelectMenu<E> extends MenuButton {
 		
 		// make all labels have the width of the widest one
 		// else clicking on the empty space to the right of shorter labels doesn't do anything
-		setOnShown(event -> {
+		setOnShown(_ -> {
 			var max = labels.stream().mapToDouble(Label::getWidth).max().orElse(0);
 			for (var label : labels) {
 				label.setPrefWidth(max);
