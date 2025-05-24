@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
+import com.google.common.base.Throwables;
 
 import groovy.lang.Script;
 import javafx.scene.control.TreeItem;
@@ -26,7 +27,8 @@ public class GameStateObject {
 	private final GameStateObject previousVersion;
 	private GameStateObject nextVersion;
 	
-	public GameStateObject(Map<Integer, GameStateObject> stateObjects, GenericObject currentVersion, HistoryFrame frame, Script summarizer) {
+	public GameStateObject(Map<Integer, GameStateObject> stateObjects, GenericObject currentVersion, HistoryFrame frame, Script summarizer,
+			List<HistoryFileProblem> problemsDetected) {
 		this.frame = frame;
 		
 		objectId = (int) currentVersion.properties.get(OBJECT_ID);
@@ -40,8 +42,16 @@ public class GameStateObject {
 			previousVersion.nextVersion = this;
 		}
 		
-		summarizer.getBinding().setProperty("gso", this);
-		summary = (String) summarizer.run();
+		String summaryTemp;
+		try {
+			summarizer.getBinding().setProperty("gso", this);
+			summaryTemp = (String) summarizer.run();
+		} catch (Exception e) {
+			summaryTemp = "";
+			problemsDetected.add(new HistoryFileProblem(
+					frame, null, this, "Summary script failed. Stack trace:\n" + Throwables.getStackTraceAsString(e)));
+		}
+		summary = summaryTemp;
 	}
 	
 	// Groovy support

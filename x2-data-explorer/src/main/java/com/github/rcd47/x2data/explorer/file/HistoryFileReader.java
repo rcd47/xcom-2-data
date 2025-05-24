@@ -63,7 +63,8 @@ public class HistoryFileReader {
 					var contextEntry = historyIndex.getEntry(rawFrame.StateChangeContext.index());
 					var contextVisitor = new GenericObjectVisitor(null);
 					historyIndex.parseObject(contextEntry, contextVisitor);
-					var parsedContext = new GameStateContext(contextVisitor.getRootObject(), parsedFrame, frames, contextSummarizer);
+					var parsedContext = new GameStateContext(
+							contextVisitor.getRootObject(), parsedFrame, frames, contextSummarizer, problemsDetected);
 					
 					for (var stateObjectRef : rawFrame.GameStates) {
 						var stateObjectEntry = historyIndex.getEntry(stateObjectRef.index());
@@ -83,14 +84,17 @@ public class HistoryFileReader {
 							// this is a sign of https://github.com/rcd47/xcom-2-data/issues/2
 							// note that in this situation, the previousVersionIndex above is -1
 							// so we are not corrupting our tracking of any objects by doing parseObject()
-							problemsDetected.add(new HistoryFileProblem(parsedFrame,
+							problemsDetected.add(new HistoryFileProblem(
+									parsedFrame,
+									null,
+									null,
 									String.format(
 											PROBLEM_MODIFIED_OLD_STATE,
 											stateObjectEntry.getType().getOriginal(),
 											stateObject.properties.get(PREV_FRAME_HIST_INDEX))));
 						} else {
 							parsedObjects.put(stateObjectRef.index(), stateObject);
-							new GameStateObject(stateObjects, stateObject, parsedFrame, objectSummarizer); // adds itself to the map
+							new GameStateObject(stateObjects, stateObject, parsedFrame, objectSummarizer, problemsDetected); // adds itself to the map
 						}
 					}
 					
