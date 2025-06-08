@@ -46,6 +46,9 @@ public class PhotoboothDatabaseParser {
 			photoData.PhotoFilename = UnrealUtils.readString(buffer);
 			
 			// skip time field
+			// unclear how this field works
+			// the first two bytes seem meaningful but the last two bytes are always 0x00 and 0x01
+			// possibly the game is bugged and is clobbering the last two bytes with other data
 			buffer.position(buffer.position() + 4);
 			
 			photoData.Favorite = buffer.getInt() != 0;

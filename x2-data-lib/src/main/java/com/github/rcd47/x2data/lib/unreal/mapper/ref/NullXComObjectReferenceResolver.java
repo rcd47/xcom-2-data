@@ -42,6 +42,21 @@ public class NullXComObjectReferenceResolver implements IXComObjectReferenceReso
 	}
 
 	@Override
+	public <T> IXComRawStateObjectReference<T> createRawStateReference(Class<T> referencedObjectType, int objectId) {
+		return new IXComRawStateObjectReference<T>() {
+			@Override
+			public T get() {
+				return null;
+			}
+
+			@Override
+			public int id() {
+				return objectId;
+			}
+		};
+	}
+
+	@Override
 	public <T> IXComNameObjectReference<T> createNameReference(Class<T> referencedObjectType, UnrealName objectName) {
 		return new IXComNameObjectReference<T>() {
 			@Override

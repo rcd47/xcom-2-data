@@ -8,6 +8,8 @@ public interface IXComObjectReferenceResolver {
 	
 	<T> IXComStateObjectReference<T> createStateReference(Class<T> referencedObjectType, int objectId);
 	
+	<T> IXComRawStateObjectReference<T> createRawStateReference(Class<T> referencedObjectType, int objectId);
+	
 	<T> IXComNameObjectReference<T> createNameReference(Class<T> referencedObjectType, UnrealName objectName);
 	
 }

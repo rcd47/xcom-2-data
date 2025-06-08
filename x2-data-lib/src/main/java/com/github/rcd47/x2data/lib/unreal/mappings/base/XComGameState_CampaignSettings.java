@@ -7,6 +7,7 @@ import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 public class XComGameState_CampaignSettings extends XComGameState_BaseObject {
 	
 	public List<UnrealName> EnabledOptionalNarrativeDLC;
+	public int GameIndex;
 	public List<UnrealName> RequiredDLC;
 	public List<UnrealName> SecondWaveOptions;
 	

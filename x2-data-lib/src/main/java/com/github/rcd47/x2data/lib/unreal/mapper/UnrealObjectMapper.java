@@ -13,6 +13,7 @@ import com.github.rcd47.x2data.lib.unreal.UnrealObjectParser;
 import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComIndexObjectReference;
 import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComNameObjectReference;
 import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComObjectReferenceResolver;
+import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComRawStateObjectReference;
 import com.github.rcd47.x2data.lib.unreal.mapper.ref.IXComStateObjectReference;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 
@@ -94,6 +95,8 @@ public class UnrealObjectMapper {
 				refFactory = new IXComNameObjectReferenceMapperFactory(referencedObjectType);
 			} else if (IXComStateObjectReference.class.equals(rawClass)) {
 				refFactory = new IXComStateObjectReferenceMapperFactory(referencedObjectType);
+			} else if (IXComRawStateObjectReference.class.equals(rawClass)) {
+				refFactory = new IXComRawStateObjectReferenceMapperFactory(referencedObjectType);
 			} else if (IXComIndexObjectReference.class.equals(rawClass)) {
 				refFactory = new IXComIndexObjectReferenceMapperFactory(referencedObjectType);
 			} else {
