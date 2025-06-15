@@ -102,7 +102,7 @@ public class HistoryFramesTable {
 		
 		var toolbar = new ToolBar(colSelector);
 		
-		var contextTypes = history.getFrames().stream().map(f -> f.getContext().getType()).distinct().sorted().toList();
+		var contextTypes = history.getContextTypes();
 		
 		var contextTypeSelector = new MultiSelectMenu<>("context types", contextTypes, n -> n.getOriginal(), s -> {
 			filters.setFilter(0, s.size() == contextTypes.size() ? null : f -> s.contains(f.getContext().getType()));

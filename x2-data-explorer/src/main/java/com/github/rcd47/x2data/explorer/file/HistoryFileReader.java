@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 
@@ -81,6 +82,8 @@ public class HistoryFileReader {
 				Map<Integer, GameStateObject> stateObjects = new HashMap<>();
 				Map<X2HistoryIndexEntry, Integer> singletonStates = new HashMap<>();
 				List<HistoryFileProblem> problemsDetected = new ArrayList<>();
+				Set<UnrealName> contextTypes = new HashSet<>();
+				Set<UnrealName> objectTypes = new HashSet<>();
 				var contextSummarizer = ScriptPreferences.CONTEXT_SUMMARY.getExecutable();
 				var objectSummarizer = ScriptPreferences.STATE_OBJECT_SUMMARY.getExecutable();
 				for (int i = 0; i < numFrames; i++) {
@@ -89,6 +92,7 @@ public class HistoryFileReader {
 					progressTextCallback.accept("Parsing objects for history frame " + rawFrame.HistoryIndex);
 					
 					var contextEntry = historyIndex.getEntry(rawFrame.StateChangeContext.index());
+					contextTypes.add(contextEntry.getType());
 					var contextVisitor = new GenericObjectVisitor(null);
 					historyIndex.parseObject(contextEntry, contextVisitor);
 					var parsedContext = new GameStateContext(
@@ -101,6 +105,7 @@ public class HistoryFileReader {
 							continue;
 						}
 						
+						objectTypes.add(stateObjectEntry.getType());
 						var previousVersionIndex = stateObjectEntry.getPreviousVersionIndex();
 						var previousVersion = previousVersionIndex == -1 ? null : parsedObjects.get(previousVersionIndex);
 						var stateObjectVisitor = new GenericObjectVisitor(previousVersion);
@@ -151,7 +156,13 @@ public class HistoryFileReader {
 								.thenComparingInt(s -> s.getFirstFrame()))
 						.toList();
 				
-				return new HistoryFile(history, List.copyOf(frames.values()), singletons, problemsDetected);
+				return new HistoryFile(
+						history,
+						List.copyOf(frames.values()),
+						singletons,
+						problemsDetected,
+						contextTypes.stream().sorted().toList(),
+						objectTypes.stream().sorted().toList());
 			}
 		} finally {
 			Files.deleteIfExists(decompressedFile);
