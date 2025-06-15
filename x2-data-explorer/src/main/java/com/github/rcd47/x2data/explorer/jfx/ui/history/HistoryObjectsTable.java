@@ -80,14 +80,7 @@ public class HistoryObjectsTable {
 		
 		var prefs = GeneralPreferences.getEffective();
 		
-		var types = history
-				.getFrames()
-				.stream()
-				.flatMap(f -> f.getObjects().values().stream())
-				.map(o -> o.getType())
-				.distinct()
-				.sorted()
-				.toList();
+		var types = history.getObjectTypes();
 		
 		var colSelector = new MultiSelectMenu<>(
 				"columns",
