@@ -9,7 +9,6 @@ public class X2HistoryIndexEntry {
 	private int previousVersionIndex;
 	private long position;
 	private int length;
-	private boolean singletonState;
 	private Class<?> mappedType;
 
 	X2HistoryIndexEntry(int arrayIndex, UnrealName type, int previousVersionIndex) {
@@ -51,14 +50,6 @@ public class X2HistoryIndexEntry {
 
 	void setLength(int length) {
 		this.length = length;
-	}
-
-	public boolean isSingletonState() {
-		return singletonState;
-	}
-
-	void setSingletonState(boolean singletonState) {
-		this.singletonState = singletonState;
 	}
 
 	public Class<?> getMappedType() {

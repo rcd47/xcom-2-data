@@ -29,7 +29,6 @@ import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealTypeName;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealUntypedProperty;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealUntypedStruct;
-import com.github.rcd47.x2data.lib.unreal.mappings.XComSingletonStateType;
 
 public class UnrealTypingsBuilder {
 	
@@ -38,7 +37,6 @@ public class UnrealTypingsBuilder {
 	private static final DotName TYPE_NAME_ANNOTATION = DotName.createSimple(UnrealTypeName.class.getName());
 	private static final DotName UNTYPED_PROPERTY_ANNOTATION = DotName.createSimple(UnrealUntypedProperty.class.getName());
 	private static final DotName UNTYPED_STRUCT_ANNOTATION = DotName.createSimple(UnrealUntypedStruct.class.getName());
-	private static final DotName SINGLETON_STATE_ANNOTATION = DotName.createSimple(XComSingletonStateType.class.getName());
 	private static final UnrealName STATE_OBJ_REF_NAME = new UnrealName("StateObjectReference");
 	private static final Map<UnrealName, String> DLC_PACKAGES = Map.ofEntries(
 			Map.entry(new UnrealName("CovertInfiltration"), "covertinf"),
@@ -84,7 +82,7 @@ public class UnrealTypingsBuilder {
 		// StateObjectReference is a special case because our field type is an interface instead of a class
 		typings.put(
 				DotName.createSimple(IXComStateObjectReference.class),
-				new UnrealTypeInformer(STATE_OBJ_REF_NAME, IXComStateObjectReference.class, false, false, Map.of(), List.of()));
+				new UnrealTypeInformer(STATE_OBJ_REF_NAME, IXComStateObjectReference.class, false, Map.of(), List.of()));
 		
 		try (var in = getClass().getResourceAsStream("/META-INF/unreal-mappings.idx")) {
 			var index = new IndexReader(in).read();
@@ -176,12 +174,11 @@ public class UnrealTypingsBuilder {
 		
 		var typeNameAnnotation = classInfo.declaredAnnotation(TYPE_NAME_ANNOTATION);
 		var unrealTypeName = new UnrealName(typeNameAnnotation == null ? dotName.local() : typeNameAnnotation.value().asString());
-		var isSingletonStateType = classInfo.declaredAnnotation(SINGLETON_STATE_ANNOTATION) != null;
 		var isUntypedStruct = classInfo.declaredAnnotation(UNTYPED_STRUCT_ANNOTATION) != null;
 		
 		try {
 			informer = new UnrealTypeInformer(
-					unrealTypeName, Class.forName(dotName.toString()), isSingletonStateType, isUntypedStruct,
+					unrealTypeName, Class.forName(dotName.toString()), isUntypedStruct,
 					arrayElementTypes, untypedProperties);
 		} catch (ClassNotFoundException e) {
 			// should never happen

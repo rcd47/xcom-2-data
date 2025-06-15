@@ -26,6 +26,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -142,6 +143,7 @@ public class HistoryObjectsTable {
 						.ifPresent(o -> Platform.runLater(() -> objectsTable.getSelectionModel().select(o)));
 			}
 		});
+		VBox.setVgrow(objectsTable, Priority.ALWAYS);
 		
 		// top-level layout
 		

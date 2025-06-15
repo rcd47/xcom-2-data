@@ -6,11 +6,12 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 
@@ -38,38 +39,65 @@ public class HistoryFileReader {
 			reader.decompress(in, decompressedIn);
 			progressTextCallback.accept("Building index");
 			try (var historyIndex = reader.buildIndex(decompressedIn)) {
-				Map<Integer, HistoryFrame> frames = new HashMap<>();
+				XComGameStateHistory history = historyIndex.mapObject(historyIndex.getEntry(0), null, NullXComObjectReferenceResolver.INSTANCE);
+				var frameRefs = history.History;
+				var currentFrameNum = history.NumArchivedFrames + 1;
+				if (!historyIndex.isCreatedByWOTC()) {
+					// before WOTC, NumArchivedFrames did not exist and archived frames were represented by -1 in the History array
+					for (int i = frameRefs.size() - 1; i >= 0; i--) {
+						if (frameRefs.get(i).index() == -1) {
+							frameRefs = frameRefs.subList(i + 1, frameRefs.size());
+							currentFrameNum = i + 2;
+							break;
+						}
+					}
+				}
+				
+				// first pass to parse the state and detect singletons
+				var numFrames = frameRefs.size();
+				var rawFrames = new XComGameState[numFrames];
+				var seenObjectIndexes = new HashSet<Integer>();
+				var detectedSingletonTypes = new HashSet<UnrealName>();
+				for (int i = 0; i < numFrames; i++) {
+					progressTextCallback.accept("Parsing history frame " + currentFrameNum++);
+					XComGameState rawFrame = historyIndex.mapObject(
+							historyIndex.getEntry(frameRefs.get(i).index()), null, NullXComObjectReferenceResolver.INSTANCE);
+					rawFrames[i] = rawFrame;
+					for (var objRef : rawFrame.GameStates) {
+						if (!seenObjectIndexes.add(objRef.index())) {
+							// multiple frames pointing to same object index, so class must be a singleton
+							// note that in strategy saves, two versions of a singleton are written
+							// the first frame (archive frame) points to one version
+							// all other frames point to the other version
+							// this does not happen for tactical saves, where all frames point to a single version
+							detectedSingletonTypes.add(historyIndex.getEntry(objRef.index()).getType());
+						}
+					}
+				}
+				
+				// second pass to parse the state objects
+				Map<Integer, HistoryFrame> frames = new LinkedHashMap<>();
 				Map<Integer, GenericObject> parsedObjects = new HashMap<>();
 				Map<Integer, GameStateObject> stateObjects = new HashMap<>();
-				Set<X2HistoryIndexEntry> singletonStates = new HashSet<>();
+				Map<X2HistoryIndexEntry, Integer> singletonStates = new HashMap<>();
 				List<HistoryFileProblem> problemsDetected = new ArrayList<>();
 				var contextSummarizer = ScriptPreferences.CONTEXT_SUMMARY.getExecutable();
 				var objectSummarizer = ScriptPreferences.STATE_OBJECT_SUMMARY.getExecutable();
-				
-				XComGameStateHistory history = historyIndex.mapObject(historyIndex.getEntry(0), null, NullXComObjectReferenceResolver.INSTANCE);
-				int numFrames = history.History.size();
-				boolean foundFirstFrame = historyIndex.isCreatedByWOTC();
 				for (int i = 0; i < numFrames; i++) {
-					var frameRef = history.History.get(i);
-					if (!foundFirstFrame && frameRef.index() == -1) {
-						// before WOTC, NumArchivedFrames did not exist and archived frames were represented by -1 in the History array
-						continue;
-					}
-					XComGameState rawFrame = historyIndex.mapObject(
-							historyIndex.getEntry(frameRef.index()), null, NullXComObjectReferenceResolver.INSTANCE);
+					XComGameState rawFrame = rawFrames[i];
 					var parsedFrame = new HistoryFrame(rawFrame.HistoryIndex, rawFrame.TimeStamp);
-					progressTextCallback.accept("Parsing history frame " + rawFrame.HistoryIndex);
+					progressTextCallback.accept("Parsing objects for history frame " + rawFrame.HistoryIndex);
 					
 					var contextEntry = historyIndex.getEntry(rawFrame.StateChangeContext.index());
 					var contextVisitor = new GenericObjectVisitor(null);
 					historyIndex.parseObject(contextEntry, contextVisitor);
 					var parsedContext = new GameStateContext(
-							contextVisitor.getRootObject(), parsedFrame, frames, contextSummarizer, problemsDetected);
+							contextEntry.getLength(), contextVisitor.getRootObject(), parsedFrame, frames, contextSummarizer, problemsDetected);
 					
 					for (var stateObjectRef : rawFrame.GameStates) {
 						var stateObjectEntry = historyIndex.getEntry(stateObjectRef.index());
-						if (stateObjectEntry.isSingletonState()) {
-							singletonStates.add(stateObjectEntry);
+						if (detectedSingletonTypes.contains(stateObjectEntry.getType())) {
+							singletonStates.putIfAbsent(stateObjectEntry, rawFrame.HistoryIndex);
 							continue;
 						}
 						
@@ -94,7 +122,7 @@ public class HistoryFileReader {
 											stateObject.properties.get(PREV_FRAME_HIST_INDEX))));
 						} else {
 							parsedObjects.put(stateObjectRef.index(), stateObject);
-							new GameStateObject(stateObjects, stateObject, parsedFrame, objectSummarizer, problemsDetected); // adds itself to the map
+							new GameStateObject(stateObjectEntry.getLength(), stateObjects, stateObject, parsedFrame, objectSummarizer, problemsDetected); // adds itself to the map
 						}
 					}
 					
@@ -103,22 +131,27 @@ public class HistoryFileReader {
 					progressPercentCallback.accept(((double) i + 1) / numFrames);
 				}
 				
+				progressTextCallback.accept("Parsing singletons");
 				var singletons = singletonStates
+						.entrySet()
 						.stream()
-						.map(s -> {
+						.map(entry -> {
+							var key = entry.getKey();
 							var stateObjectVisitor = new GenericObjectVisitor(null);
 							try {
-								historyIndex.parseObject(s, stateObjectVisitor);
+								historyIndex.parseObject(key, stateObjectVisitor);
 							} catch (IOException e) {
 								// should never happen
 								throw new UncheckedIOException(e);
 							}
-							return new HistorySingletonObject(stateObjectVisitor.getRootObject());
+							return new HistorySingletonObject(key.getLength(), entry.getValue(), stateObjectVisitor.getRootObject());
 						})
-						.sorted((a, b) -> a.getType().compareTo(b.getType()))
+						.sorted(Comparator
+								.<HistorySingletonObject, UnrealName>comparing(s -> s.getType())
+								.thenComparingInt(s -> s.getFirstFrame()))
 						.toList();
 				
-				return new HistoryFile(history, frames.values().stream().sorted().toList(), singletons, problemsDetected);
+				return new HistoryFile(history, List.copyOf(frames.values()), singletons, problemsDetected);
 			}
 		} finally {
 			Files.deleteIfExists(decompressedFile);

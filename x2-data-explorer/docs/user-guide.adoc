@@ -18,7 +18,7 @@ Multiple files can be loaded at the same time. Each file will be in a separate t
 
 Save files are produced when you save a regular game. History files are produced when you save a ladder game. Save and history files have the same format and work the same way, except that save files have an additional header with some extra information. Both file types contain the entire game state history since the last time the history was archived (which occurs during each map transition).
 
-After loading one of these files, the tab will contain three sub-tabs: the <<general-tab>>, the <<frames-tab>>, and the <<problems-tab>>.
+After loading one of these files, the tab will contain four sub-tabs: the <<general-tab>>, the <<frames-tab>>, the <<bloat-tab>>, and the <<problems-tab>>.
 
 [#general-tab]
 === General Tab
@@ -29,7 +29,7 @@ For a save file, the General tab contains four sections:
 
 * Top left: information from the save file header. This can tell you things like: when the save file was created, whether it was created in tactical or strategy, and which version of the game created it.
 * Top right: a list of mods and DLCs that were active when the save was created.
-* Bottom left: a list of singleton XComGameStateObjects. Singleton objects are objects whose class has `bSingletonStateType` set to true. Historical versions of these objects are not serialized, so unlike other objects, there is no way to know what a singleton object looked like at each frame in the history. Fortunately, singleton objects are very rare. XComGameState_Analytics is the only such class in the base game.
+* Bottom left: a list of singleton XComGameStateObjects. Singleton objects are objects whose class has `bSingletonStateType` set to true. Historical versions of these objects are not serialized, except in strategy saves, where the archive frame holds the original state of the object. So unlike other objects, there is no way to know what a singleton object looked like at each frame in the history. Fortunately, singleton objects are very rare. XComGameState_Analytics is the only such class in the base game.
 * Bottom right: the object properties tree, populated when you click on any singleton object.
 
 For a history file, the General tab is mostly the same, except the list of mods and DLCs is removed, and the header information only contains a few fields that are available from XComGameStateHistory.
@@ -82,6 +82,20 @@ IMPORTANT: When writing expressions to match fields that are Unreal names, remem
 ==== Context and Object Summaries
 
 The frames and objects tables have a summary column that provides a short description of what that frame or object is about. The summaries are powered by Groovy scripts. Default scripts are included in the application, but can be modified if you like. In the Preferences menu at the top of the screen, click the State Object Summary Script or Context Summary Script menu items to edit the scripts.
+
+[#bloat-tab]
+=== Bloat Analysis Tab
+
+image::bloat-analysis-tab.png[]
+
+The Bloat Analysis tab helps you figure out what's using the most space in your save files. It has six sub-tabs:
+
+. *Object Class Stats* provides summary statistics for objects that are subclasses of `XComGameState_BaseObject`. It shows the number of objects, min/max/average number of deltas per object (i.e. the number of times an object was changed), and the min/max/average size of each delta.
+. *Context Class Stats* provides summary statistics for objects that are subclasses of `XComGameStateContext`. It shows the number of frames that used a context of each class, and the min/max/average/total bytes used by those contexts.
+. *Largest Delta Objects* lists the top 500 largest delta objects in the file. The object ID and frame number are provided so you can switch to the Frames tab to get a better idea of what was happening in that frame.
+. *Largest Full Objects* lists the top 500 largest full (non-delta) objects in the file. The object ID and frame number are provided so you can switch to the Frames tab to get a better idea of what was happening in that frame.
+. *Largest Contexts* lists the top 500 largest contexts in the file. The frame number is provided so you can switch to the Frames tab to get a better idea of what was happening in that frame.
+. *Singletons* shows the size of all singleton state objects in the file.
 
 [#problems-tab]
 === Problems Tab

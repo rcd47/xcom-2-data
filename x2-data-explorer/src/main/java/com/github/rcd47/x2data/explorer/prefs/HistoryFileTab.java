@@ -4,6 +4,7 @@ public enum HistoryFileTab {
 	
 	GENERAL("General"),
 	FRAMES("Frames"),
+	BLOAT_ANALYSIS("Bloat Analysis"),
 	PROBLEMS("Problems"),
 	;
 	

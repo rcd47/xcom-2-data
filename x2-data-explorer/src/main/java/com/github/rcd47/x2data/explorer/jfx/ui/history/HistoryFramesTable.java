@@ -22,6 +22,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
@@ -124,6 +125,7 @@ public class HistoryFramesTable {
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 		table.itemsProperty().bind(
 				filters.getProperty().map(p -> FXCollections.observableList(history.getFrames().stream().filter(p).toList())));
+		VBox.setVgrow(table, Priority.ALWAYS);
 		
 		// top-level layout
 		

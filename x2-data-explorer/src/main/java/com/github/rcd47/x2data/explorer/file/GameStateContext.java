@@ -11,12 +11,13 @@ import com.google.common.base.Throwables;
 
 import groovy.lang.Script;
 
-public class GameStateContext {
+public class GameStateContext implements ISizedObject {
 	
 	private static final UnrealName INTERRUPTION_HISTORY_INDEX = new UnrealName("InterruptionHistoryIndex");
 	private static final UnrealName HISTORY_INDEX_INTERRUPTED_BY_SELF = new UnrealName("HistoryIndexInterruptedBySelf");
 	private static final UnrealName INTERRUPTION_STATUS = new UnrealName("InterruptionStatus");
 	
+	private final int sizeInFile;
 	private final UnrealName type;
 	private final Map<UnrealName, NonVersionedField> fields;
 	private final HistoryFrame frame;
@@ -26,8 +27,9 @@ public class GameStateContext {
 	private final HistoryFrame interruptedByThis;
 	private HistoryFrame resumedBy;
 	
-	public GameStateContext(GenericObject object, HistoryFrame frame, Map<Integer, HistoryFrame> frames, Script summarizer,
+	public GameStateContext(int sizeInFile, GenericObject object, HistoryFrame frame, Map<Integer, HistoryFrame> frames, Script summarizer,
 			List<HistoryFileProblem> problemsDetected) {
+		this.sizeInFile = sizeInFile;
 		this.frame = frame;
 		
 		type = object.type;
@@ -66,6 +68,11 @@ public class GameStateContext {
 	// Groovy support
 	public Object propertyMissing(String name) {
 		return fields.get(new UnrealName(name));
+	}
+
+	@Override
+	public int getSizeInFile() {
+		return sizeInFile;
 	}
 
 	public UnrealName getType() {
