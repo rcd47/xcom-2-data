@@ -38,8 +38,6 @@ import javafx.scene.control.TableView;
 
 public class HistoryBloatAnalysisUI {
 	
-	// TODO update docs with this UI
-	
 	private static final int LARGEST_LIMIT = 500;
 	
 	public HistoryBloatAnalysisUI(HistoryFile history, Tab parent) {
@@ -66,11 +64,7 @@ public class HistoryBloatAnalysisUI {
 					for (var gso : frame.getObjects().values()) {
 						if (gso.getFrame().equals(frame)) {
 							perObjectStatsMap.computeIfAbsent(gso.getObjectId(), _ -> new GameStateObjectStats()).add(gso);
-							if (gso.getPreviousVersion() == null) {
-								largestFullObjects.add(gso);
-							} else {
-								largestDeltaObjects.add(gso);
-							}
+							(gso.getPreviousVersion() == null ? largestFullObjects : largestDeltaObjects).add(gso);
 						}
 					}
 					updateProgress(((double) i + 1) / numFrames, 1);
@@ -368,7 +362,7 @@ public class HistoryBloatAnalysisUI {
 		int queueSize;
 		
 		LargestList() {
-			queue = new PriorityQueue<>(LARGEST_LIMIT + 1, Comparator.comparingInt(ISizedObject::getSizeInFile));
+			queue = new PriorityQueue<>(LARGEST_LIMIT, Comparator.comparingInt(ISizedObject::getSizeInFile));
 		}
 		
 		void add(T obj) {
