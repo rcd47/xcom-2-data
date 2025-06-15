@@ -22,6 +22,8 @@ import com.github.rcd47.x2data.explorer.file.GenericObjectVisitor;
 import com.github.rcd47.x2data.explorer.file.HistoryFileReader;
 import com.github.rcd47.x2data.explorer.file.NonVersionedField;
 import com.github.rcd47.x2data.explorer.jfx.ui.NonVersionedFieldUI;
+import com.github.rcd47.x2data.explorer.jfx.ui.ProgressUtils;
+import com.github.rcd47.x2data.explorer.jfx.ui.history.HistoryBloatAnalysisUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.history.HistoryFramesUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.history.HistoryGeneralUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.history.HistoryProblemsUI;
@@ -38,14 +40,12 @@ import com.github.rcd47.x2data.lib.unreal.UnrealUtils;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealBasicSaveObject;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
 import com.github.rcd47.x2data.lib.unreal.typings.UnrealTypingsBuilder;
-import com.google.common.base.Throwables;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
@@ -53,14 +53,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -68,13 +65,9 @@ import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TabPane.TabDragPolicy;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -270,7 +263,7 @@ public class Main extends Application {
 			} catch (IOException e2) {
 				e.addSuppressed(e2);
 			}
-			tab.setContent(readingFileFailed(e));
+			tab.setContent(ProgressUtils.createTaskFailureUi(e));
 		}
 		tabPane.getTabs().add(tab);
 		tabPane.getSelectionModel().select(tab);
@@ -337,7 +330,7 @@ public class Main extends Application {
 
 			@Override
 			protected void failed() {
-				splitPane.getItems().set(0, readingFileFailed(getException()));
+				splitPane.getItems().set(0, ProgressUtils.createTaskFailureUi(getException()));
 			}
 		};
 		
@@ -365,7 +358,7 @@ public class Main extends Application {
 
 			@Override
 			protected void failed() {
-				splitLeft.getChildren().setAll(readingFileFailed(getException()));
+				splitLeft.getChildren().setAll(ProgressUtils.createTaskFailureUi(getException()));
 			}
 		};
 		
@@ -377,14 +370,20 @@ public class Main extends Application {
 			@Override
 			protected Node call() throws Exception {
 				try {
+					updateProgress(0, 1); // don't show indeterminate progress because we switch to determinate so quickly
 					var header = isSaveFile ? new X2SaveGameReader().readHeader(in) : null;
 					var history = new HistoryFileReader().read(in, p -> updateProgress(p, 1), this::updateMessage);
+					updateMessage("Setting up UI");
 					
 					var generalTab = new Tab(HistoryFileTab.GENERAL.getTabTitle(), new HistoryGeneralUI(header, history).getNode());
 					generalTab.setClosable(false);
 					
 					var framesTab = new Tab(HistoryFileTab.FRAMES.getTabTitle(), new HistoryFramesUI(history).getNode());
 					framesTab.setClosable(false);
+					
+					var bloatAnalysisTab = new Tab(HistoryFileTab.BLOAT_ANALYSIS.getTabTitle());
+					new HistoryBloatAnalysisUI(history, bloatAnalysisTab);
+					bloatAnalysisTab.setClosable(false);
 					
 					var problemsCount = history.getProblems().size();
 					var problemsTab = new Tab(
@@ -397,12 +396,13 @@ public class Main extends Application {
 					var defaultTabConfig = header == null ?
 							GeneralPreferences.getEffective().getHistoryFileDefaultTab() : GeneralPreferences.getEffective().getSaveFileDefaultTab();
 					var defaultTab = switch (defaultTabConfig.get()) {
+						case BLOAT_ANALYSIS -> bloatAnalysisTab;
 						case FRAMES -> framesTab;
 						case GENERAL -> generalTab;
 						case PROBLEMS -> problemsTab;
 					};
 					
-					var tabPane = new TabPane(generalTab, framesTab, problemsTab);
+					var tabPane = new TabPane(generalTab, framesTab, bloatAnalysisTab, problemsTab);
 					tabPane.getSelectionModel().select(defaultTab);
 					
 					return tabPane;
@@ -418,46 +418,13 @@ public class Main extends Application {
 
 			@Override
 			protected void failed() {
-				tab.setContent(readingFileFailed(getException()));
+				tab.setContent(ProgressUtils.createTaskFailureUi(getException()));
 			}
 		};
 		
-		tab.setContent(readingFileStarted(task));
+		tab.setContent(ProgressUtils.createProgressUi(task));
 		
 		new Thread(task, "HistoryFileLoader").start();
-	}
-	
-	private static Node readingFileStarted(Task<?> task) {
-		var progressBar = new ProgressBar();
-		progressBar.setPrefWidth(400);
-		progressBar.progressProperty().bind(task.progressProperty());
-		
-		var progressText = new Text();
-		progressText.textProperty().bind(task.messageProperty());
-		
-		var vbox = new VBox(5, progressBar, progressText);
-		vbox.setAlignment(Pos.BASELINE_CENTER);
-		vbox.setPadding(new Insets(10));
-		
-		return vbox;
-	}
-	
-	private static Node readingFileFailed(Throwable t) {
-		var text = new Text(Throwables.getStackTraceAsString(t));
-		text.setFill(Color.RED);
-		
-		var copyMenuItem = new MenuItem("Copy to clipboard");
-		copyMenuItem.setOnAction(_ -> {
-			var content = new ClipboardContent();
-			content.putString(text.getText());
-			Clipboard.getSystemClipboard().setContent(content);
-		});
-		
-		var scrollPane = new ScrollPane(text);
-		scrollPane.setPadding(new Insets(10));
-		scrollPane.setContextMenu(new ContextMenu(copyMenuItem));
-		
-		return scrollPane;
 	}
 
 	public static void main(String[] args) {

@@ -27,6 +27,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -138,6 +139,7 @@ public class ObjectPropertiesTable {
 				modifiedCheckbox.selectedProperty(),
 				objectsTable.getSelectionModel().selectedItemProperty()));
 		TreeTableUtils.addDefaultExpandListener(prefs.getHistoryObjPropsTreeExpanded(), table);
+		VBox.setVgrow(table, Priority.ALWAYS);
 		
 		// top-level layout
 		
@@ -178,39 +180,48 @@ public class ObjectPropertiesTable {
 		protected void updateItem(GameStateObjectField item, boolean empty) {
 			super.updateItem(item, empty);
 			if (empty || item == null) {
-				setGraphic(null);
+				if (framesTable == null) {
+					setText(null);
+				} else {
+					setGraphic(null);
+				}
 			} else {
 				var state = item.getLastChangedAt();
 				var frame = state.getFrame();
-				var link = new Hyperlink(Integer.toString(frame.getNumber()));
-				link.setOnAction(_ -> {
-					var path = new ArrayList<UnrealName>();
-					var treeItem = getTableRow().getTreeItem();
-					while (true) {
-						path.add(treeItem.getValue().getName());
-						treeItem = treeItem.getParent();
-						if (treeItem.getValue() == null) {
-							// reached root node
-							break;
+				var frameNum = Integer.toString(frame.getNumber());
+				if (framesTable == null) {
+					setText(frameNum);
+				} else {
+					var link = new Hyperlink(frameNum);
+					link.setOnAction(_ -> {
+						var path = new ArrayList<UnrealName>();
+						var treeItem = getTableRow().getTreeItem();
+						while (true) {
+							path.add(treeItem.getValue().getName());
+							treeItem = treeItem.getParent();
+							if (treeItem.getValue() == null) {
+								// reached root node
+								break;
+							}
 						}
-					}
-					Collections.reverse(path);
-					
-					framesTable.getSelectionModel().select(frame);
-					framesTable.scrollTo(framesTable.getSelectionModel().getSelectedIndex());
-					objectsTable.getSelectionModel().select(state);
-					objectsTable.scrollTo(objectsTable.getSelectionModel().getSelectedIndex());
-					
-					var newTreeItem = table.getRoot();
-					for (var element : path) {
-						newTreeItem.setExpanded(true);
-						newTreeItem = newTreeItem.getChildren().stream().filter(i -> i.getValue().getName().equals(element)).findAny().get();
+						Collections.reverse(path);
 						
-					}
-					table.getSelectionModel().select(newTreeItem);
-					table.scrollTo(table.getSelectionModel().getSelectedIndex());
-				});
-				setGraphic(link);
+						framesTable.getSelectionModel().select(frame);
+						framesTable.scrollTo(framesTable.getSelectionModel().getSelectedIndex());
+						objectsTable.getSelectionModel().select(state);
+						objectsTable.scrollTo(objectsTable.getSelectionModel().getSelectedIndex());
+						
+						var newTreeItem = table.getRoot();
+						for (var element : path) {
+							newTreeItem.setExpanded(true);
+							newTreeItem = newTreeItem.getChildren().stream().filter(i -> i.getValue().getName().equals(element)).findAny().get();
+							
+						}
+						table.getSelectionModel().select(newTreeItem);
+						table.scrollTo(table.getSelectionModel().getSelectedIndex());
+					});
+					setGraphic(link);
+				}
 			}
 		}
 	}

@@ -13,11 +13,12 @@ import com.google.common.base.Throwables;
 import groovy.lang.Script;
 import javafx.scene.control.TreeItem;
 
-public class GameStateObject {
+public class GameStateObject implements ISizedObject {
 	
 	private static final UnrealName OBJECT_ID = new UnrealName("ObjectID");
 	private static final UnrealName REMOVED = new UnrealName("bRemoved");
 	
+	private final int sizeInFile;
 	private final int objectId;
 	private final boolean removed; // note that it is possible for an object to be added and removed in the same state
 	private final UnrealName type;
@@ -27,8 +28,9 @@ public class GameStateObject {
 	private final GameStateObject previousVersion;
 	private GameStateObject nextVersion;
 	
-	public GameStateObject(Map<Integer, GameStateObject> stateObjects, GenericObject currentVersion, HistoryFrame frame, Script summarizer,
-			List<HistoryFileProblem> problemsDetected) {
+	public GameStateObject(int sizeInFile, Map<Integer, GameStateObject> stateObjects, GenericObject currentVersion,
+			HistoryFrame frame, Script summarizer, List<HistoryFileProblem> problemsDetected) {
+		this.sizeInFile = sizeInFile;
 		this.frame = frame;
 		
 		objectId = (int) currentVersion.properties.get(OBJECT_ID);
@@ -71,6 +73,11 @@ public class GameStateObject {
 		return root;
 	}
 	
+	@Override
+	public int getSizeInFile() {
+		return sizeInFile;
+	}
+
 	public int getObjectId() {
 		return objectId;
 	}

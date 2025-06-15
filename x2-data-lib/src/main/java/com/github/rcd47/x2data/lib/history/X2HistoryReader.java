@@ -208,7 +208,6 @@ public class X2HistoryReader {
 			for (var entry : entries) {
 				var entryTyping = typings.getOrDefault(entry.getType(), UnrealTypeInformer.UNKNOWN);
 				entry.setMappedType(entryTyping.mappedType);
-				entry.setSingletonState(entryTyping.isSingletonStateType);
 			}
 			
 			return new X2HistoryIndex(decompressedIn, createdByWOTC, entries, typings);

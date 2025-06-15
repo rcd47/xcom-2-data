@@ -10,14 +10,17 @@ import com.github.rcd47.x2data.lib.unreal.mappings.UnrealUntypedProperty;
 
 public class XComGameState_Unit extends XComGameState_BaseObject {
 	
+	public List<IXComStateObjectReference<XComGameState_Ability>> Abilities;
 	public List<SoldierRankAbilities> AbilityTree;
 	public List<UnrealName> AcquiredTraits;
 	public List<UnrealName> ActionPoints;
 	public List<UnrealName> AffectedByEffectNames;
+	public List<IXComStateObjectReference<XComGameState_Effect>> AffectedByEffects;
 	public List<UnrealName> AlertTraits;
 	public List<SoldierBond> AllSoldierBonds;
 	public List<AppearanceInfo> AppearanceStore;
 	public List<UnrealName> AppliedEffectNames;
+	public List<IXComStateObjectReference<XComGameState_Effect>> AppliedEffects;
 	public List<ClassAgnosticAbility> AWCAbilities;
 	public boolean bIsSpecial;
 	public Map<ECharStatType, CharacterStat> CharacterStats;
@@ -30,6 +33,7 @@ public class XComGameState_Unit extends XComGameState_BaseObject {
 	public List<Integer> EnemiesInteractedWithSinceLastTurn;
 	public List<UnrealName> HackRewards;
 	public List<Integer> HackRollMods;
+	public List<IXComStateObjectReference<XComGameState_Item>> InventoryItems;
 	public List<UnrealName> KilledByDamageTypes;
 	public IXComNameObjectReference<X2SoldierClassTemplate> m_SoldierClassTemplateName;
 	public List<SCATProgression> m_SoldierProgressionAbilties;

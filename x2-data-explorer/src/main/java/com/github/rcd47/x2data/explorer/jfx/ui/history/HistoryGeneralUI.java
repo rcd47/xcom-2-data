@@ -77,9 +77,11 @@ public class HistoryGeneralUI {
 		var colSingletonType = new TableColumn<HistorySingletonObject, String>("Singleton Type");
 		colSingletonType.setCellValueFactory(f -> new ReadOnlyStringWrapper(f.getValue().getType().getOriginal()));
 		StandardCellFactoryHelper.setFactoryForStringValueColumn(colSingletonType);
+		var colSingletonFirstFrame = new TableColumn<HistorySingletonObject, Integer>("First Frame");
+		colSingletonFirstFrame.setCellValueFactory(f -> new ReadOnlyIntegerWrapper(f.getValue().getFirstFrame()).asObject());
 		
 		var singletonsTable = new TableView<>(FXCollections.observableList(historyFile.getSingletons()));
-		singletonsTable.getColumns().addAll(colSingletonId, colSingletonType);
+		singletonsTable.getColumns().addAll(colSingletonId, colSingletonType, colSingletonFirstFrame);
 		singletonsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 		
 		// singleton state properties table
