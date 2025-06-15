@@ -14,11 +14,10 @@ if (gso.ApplyEffectParameters) {
 	} else {
 		source = gso.ApplyEffectParameters.EffectRef.LookupType.value.original
 	}
-	return source +
-			' by ' +
-			gso.ApplyEffectParameters.SourceStateObjectRef.ObjectID.value +
-			' on ' +
-			gso.ApplyEffectParameters.TargetStateObjectRef.ObjectID.value
+	if (gso.ApplyEffectParameters.SourceStateObjectRef) { // effects applied by XCGSC_UpdateWorldEffects do not have a source
+		source += ' by ' + gso.ApplyEffectParameters.SourceStateObjectRef.ObjectID.value
+	}
+	return source + ' on ' + gso.ApplyEffectParameters.TargetStateObjectRef.ObjectID.value
 }
 
 // XComGameState_Unit
