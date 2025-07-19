@@ -41,8 +41,13 @@ public class UnrealTypingsBuilder {
 	private static final Map<UnrealName, String> DLC_PACKAGES = Map.ofEntries(
 			Map.entry(new UnrealName("CovertInfiltration"), "covertinf"),
 			Map.entry(new UnrealName("DarkXCOMRedux"), "mocx"),
+			Map.entry(new UnrealName("EvacAll_WotC"), "evacall"),
 			Map.entry(new UnrealName("GrimHorizonFix"), "ghfix"),
+			Map.entry(new UnrealName("LEBPortrait"), "lebportrait"),
+			Map.entry(new UnrealName("LootYouMissed"), "lym"),
 			Map.entry(new UnrealName("PauseWorldTime"), "pauseworldtime"),
+			Map.entry(new UnrealName("WOTC_AlienPack"), "wotcalienpack"),
+			Map.entry(new UnrealName("WOTCGotchaAgain"), "wotcga"),
 			Map.entry(new UnrealName("X2Statistics"), "x2stats"));
 	
 	public Map<UnrealName, UnrealTypeInformer> buildBasicSaveObjects() {

@@ -13,6 +13,7 @@ public class XComGameState_HeadquartersXCom extends XComGameState_Airship {
 	public List<GeneratedMissionData> arrGeneratedMissionData;
 	public List<IXComStateObjectReference<XComGameState_Unit>> Crew;
 	public List<HQOrder> CurrentOrders;
+	public List<IXComStateObjectReference<XComGameState_Unit>> DeadCrew;
 	public List<Integer> EverAcquiredInventoryCounts;
 	public List<UnrealName> EverAcquiredInventoryTypes;
 	public List<UnrealName> ExtraUpgradeWeaponCats;

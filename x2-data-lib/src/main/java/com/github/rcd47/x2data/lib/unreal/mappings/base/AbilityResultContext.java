@@ -6,6 +6,7 @@ public class AbilityResultContext {
 	
 	public List<EffectRedirect> EffectRedirects;
 	public EAbilityHitResult HitResult;
+	public int InterruptionStep;
 	public List<ArmorMitigationResults> MultiTargetArmorMitigation;
 	public List<EffectResults> MultiTargetEffectResults;
 	public List<OverriddenEffectsByType> MultiTargetEffectsOverrides;

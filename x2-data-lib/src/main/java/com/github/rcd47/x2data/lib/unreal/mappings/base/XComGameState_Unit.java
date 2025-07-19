@@ -22,6 +22,7 @@ public class XComGameState_Unit extends XComGameState_BaseObject {
 	public List<UnrealName> AppliedEffectNames;
 	public List<IXComStateObjectReference<XComGameState_Effect>> AppliedEffects;
 	public List<ClassAgnosticAbility> AWCAbilities;
+	public boolean bCaptured;
 	public boolean bIsSpecial;
 	public Map<ECharStatType, CharacterStat> CharacterStats;
 	public IXComStateObjectReference<XComGameState_AdventChosen> ChosenRef;
@@ -34,7 +35,9 @@ public class XComGameState_Unit extends XComGameState_BaseObject {
 	public List<UnrealName> HackRewards;
 	public List<Integer> HackRollMods;
 	public List<IXComStateObjectReference<XComGameState_Item>> InventoryItems;
+	public List<IXComStateObjectReference<XComGameState_Unit>> KillAssists;
 	public List<UnrealName> KilledByDamageTypes;
+	public List<IXComStateObjectReference<XComGameState_Unit>> KilledUnits;
 	public IXComNameObjectReference<X2SoldierClassTemplate> m_SoldierClassTemplateName;
 	public List<SCATProgression> m_SoldierProgressionAbilties;
 	public int m_SoldierRank;
@@ -42,7 +45,7 @@ public class XComGameState_Unit extends XComGameState_BaseObject {
 	public IXComNameObjectReference<X2CharacterTemplate> m_TemplateName;
 	public EMentalState MentalState = EMentalState.eMentalState_Ready; // set in defaultproperties
 	public List<NegativeTraitRecoveryInfo> NegativeTraits;
-	public UnrealName nmCountry;
+	public IXComNameObjectReference<X2CountryTemplate> nmCountry;
 	public List<EquipmentInfo> OldInventoryItems;
 	public List<UnrealName> PendingTraits;
 	public List<SCATProgression> PsiAbilities;

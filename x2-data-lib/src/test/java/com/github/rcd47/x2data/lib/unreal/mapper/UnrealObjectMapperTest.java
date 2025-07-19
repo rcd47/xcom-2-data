@@ -80,7 +80,7 @@ public class UnrealObjectMapperTest {
 				+ "\n"
 				+ "Geist believes April is one of the more naturally gifted among her many followers. Long before encountering the Templars, April was already manipulating her surroundings with the power of Psionic energy.");
 		
-		assertThat(unit.nmCountry).isEqualTo(new UnrealName("Country_Templar"));
+		assertThat(unit.nmCountry.name()).isEqualTo(new UnrealName("Country_Templar"));
 		
 		assertThat(unit.UnitValues).containsOnlyKeys(new UnrealName("CH_StartMissionWill"));
 		assertThat(unit.UnitValues.get(new UnrealName("CH_StartMissionWill")).eCleanup).isEqualTo(EUnitValueCleanup.eCleanup_Never);

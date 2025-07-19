@@ -7,6 +7,7 @@ public class X2AbilityTemplate extends X2DataTemplate {
 	public IXComNameObjectReference<Void> AbilityTargetStyle;
 	public IXComNameObjectReference<Void> AbilityToHitCalc;
 	public EAbilityHostility Hostility;
+	public String IconImage;
 	public String LocFriendlyName;
 	
 }
