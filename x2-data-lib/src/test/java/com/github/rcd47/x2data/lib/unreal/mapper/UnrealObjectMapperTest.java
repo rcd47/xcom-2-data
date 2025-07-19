@@ -64,9 +64,9 @@ public class UnrealObjectMapperTest {
 		
 		assertThat(unit.AbilityTree).hasSize(7);
 		assertThat(unit.AbilityTree.get(0).Abilities).isNotEmpty();
-		assertThat(unit.AbilityTree.get(0).Abilities.get(0).AbilityName).isEqualTo(new UnrealName("Rend"));
+		assertThat(unit.AbilityTree.get(0).Abilities.get(0).AbilityName.name()).isEqualTo(new UnrealName("Rend"));
 		assertThat(unit.AbilityTree.get(3).Abilities.get(1)).isNotNull();
-		assertThat(unit.AbilityTree.get(3).Abilities.get(1).AbilityName).isEqualTo(UnrealName.EMPTY);
+		assertThat(unit.AbilityTree.get(3).Abilities.get(1).AbilityName).isNull();
 		
 		assertThat(unit.strFirstName).isEqualTo("April");
 		
