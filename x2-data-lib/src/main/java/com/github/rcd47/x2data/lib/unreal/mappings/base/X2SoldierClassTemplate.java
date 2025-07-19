@@ -4,6 +4,7 @@ import java.util.List;
 
 public class X2SoldierClassTemplate extends X2DataTemplate {
 	
+	public List<String> AbilityTreeTitles;
 	public String DisplayName;
 	public String IconImage;
 	public List<String> RankIcons;

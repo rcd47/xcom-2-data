@@ -64,9 +64,9 @@ public class UnrealObjectMapperTest {
 		
 		assertThat(unit.AbilityTree).hasSize(7);
 		assertThat(unit.AbilityTree.get(0).Abilities).isNotEmpty();
-		assertThat(unit.AbilityTree.get(0).Abilities.get(0).AbilityName).isEqualTo(new UnrealName("Rend"));
+		assertThat(unit.AbilityTree.get(0).Abilities.get(0).AbilityName.name()).isEqualTo(new UnrealName("Rend"));
 		assertThat(unit.AbilityTree.get(3).Abilities.get(1)).isNotNull();
-		assertThat(unit.AbilityTree.get(3).Abilities.get(1).AbilityName).isEqualTo(UnrealName.EMPTY);
+		assertThat(unit.AbilityTree.get(3).Abilities.get(1).AbilityName).isNull();
 		
 		assertThat(unit.strFirstName).isEqualTo("April");
 		
@@ -80,7 +80,7 @@ public class UnrealObjectMapperTest {
 				+ "\n"
 				+ "Geist believes April is one of the more naturally gifted among her many followers. Long before encountering the Templars, April was already manipulating her surroundings with the power of Psionic energy.");
 		
-		assertThat(unit.nmCountry).isEqualTo(new UnrealName("Country_Templar"));
+		assertThat(unit.nmCountry.name()).isEqualTo(new UnrealName("Country_Templar"));
 		
 		assertThat(unit.UnitValues).containsOnlyKeys(new UnrealName("CH_StartMissionWill"));
 		assertThat(unit.UnitValues.get(new UnrealName("CH_StartMissionWill")).eCleanup).isEqualTo(EUnitValueCleanup.eCleanup_Never);
