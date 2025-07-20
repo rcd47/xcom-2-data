@@ -1,9 +1,6 @@
 package com.github.rcd47.x2data.explorer.jfx.ui;
 
-import java.util.Map.Entry;
-
-import com.github.rcd47.x2data.explorer.file.NonVersionedField;
-import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
+import com.github.rcd47.x2data.explorer.file.data.X2VersionedDatumTreeItem;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -22,21 +19,21 @@ import javafx.scene.layout.VBox;
 
 public class NonVersionedFieldUI {
 	
-	private final TreeTableView<Entry<UnrealName, NonVersionedField>> table;
+	private final TreeTableView<X2VersionedDatumTreeItem> table;
 	private final Node node;
 	
 	@SuppressWarnings("unchecked")
 	public NonVersionedFieldUI(BooleanProperty defaultExpand, String placeholder) {
-		var colPropName = new TreeTableColumn<Entry<UnrealName, NonVersionedField>, String>("Property");
+		var colPropName = new TreeTableColumn<X2VersionedDatumTreeItem, String>("Property");
 		colPropName.setPrefWidth(Region.USE_COMPUTED_SIZE);
-		colPropName.setCellValueFactory(f -> new ReadOnlyStringWrapper(f.getValue().getValue().getKey().getOriginal()));
+		colPropName.setCellValueFactory(f -> new ReadOnlyStringWrapper(f.getValue().getValue().getName().getOriginal()));
 		StandardCellFactoryHelper.setFactoryForStringValueColumn(colPropName);
-		var colPropValue = new TreeTableColumn<Entry<UnrealName, NonVersionedField>, Object>("Value");
+		var colPropValue = new TreeTableColumn<X2VersionedDatumTreeItem, Object>("Value");
 		colPropValue.setPrefWidth(Region.USE_COMPUTED_SIZE);
-		colPropValue.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue().getValue().getValue()));
+		colPropValue.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue().getValue()));
 		StandardCellFactoryHelper.setFactoryForObjectValueColumn(colPropValue);
 		
-		table = new TreeTableView<Entry<UnrealName, NonVersionedField>>();
+		table = new TreeTableView<>();
 		table.setPlaceholder(new Label(placeholder));
 		table.getColumns().addAll(colPropName, colPropValue);
 		table.setColumnResizePolicy(TreeTableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
@@ -59,7 +56,7 @@ public class NonVersionedFieldUI {
 		return node;
 	}
 
-	public ObjectProperty<TreeItem<Entry<UnrealName, NonVersionedField>>> getRootProperty() {
+	public ObjectProperty<TreeItem<X2VersionedDatumTreeItem>> getRootProperty() {
 		return table.rootProperty();
 	}
 	

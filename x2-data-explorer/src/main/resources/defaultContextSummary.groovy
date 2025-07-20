@@ -3,32 +3,32 @@
 
 // XComGameStateContext_ChangeContainer
 if (ctx.ChangeInfo) {
-	return ctx.ChangeInfo.value
+	return ctx.ChangeInfo
 }
 
 if (ctx.InputContext) {
 	// XComGameStateContext_Ability
 	if (ctx.ResultContext) {
-		return ctx.InputContext.AbilityTemplateName.value.original
+		return ctx.InputContext.AbilityTemplateName.original
 	}
 	
 	// XComGameStateContext_HeadquartersOrder
 	if (ctx.InputContext.OrderType) {
-		return ctx.InputContext.OrderType.value.original
+		return ctx.InputContext.OrderType.original
 	}
 }
 
 // XComGameStateContext_Kismet
 if (ctx.SeqOpName) {
-	return ctx.SeqOpName.value.original
+	return ctx.SeqOpName.original
 }
 
 // XComGameStateContext_WillRoll
 if (ctx.RollSourceFriendly) {
-	return ctx.TargetUnitID.value + ' ' + ctx.RollSourceFriendly.value
+	return ctx.TargetUnitID + ' ' + ctx.RollSourceFriendly
 }
 
 // XComGameStateContext_StrategyGameRule and XComGameStateContext_TacticalGameRule
 if (ctx.GameRuleType) {
-	return ctx.GameRuleType.value.original
+	return ctx.GameRuleType.original
 }

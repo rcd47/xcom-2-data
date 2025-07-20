@@ -30,32 +30,12 @@ public class UnrealName implements Comparable<UnrealName> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((normalized == null) ? 0 : normalized.hashCode());
-		return result;
+		return normalized.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		UnrealName other = (UnrealName) obj;
-		if (normalized == null) {
-			if (other.normalized != null) {
-				return false;
-			}
-		} else if (!normalized.equals(other.normalized)) {
-			return false;
-		}
-		return true;
+		return obj == this || (obj instanceof UnrealName other && normalized.equals(other.normalized));
 	}
 
 	@Override

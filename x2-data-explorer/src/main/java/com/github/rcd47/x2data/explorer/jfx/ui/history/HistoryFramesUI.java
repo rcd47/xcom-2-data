@@ -1,7 +1,6 @@
 package com.github.rcd47.x2data.explorer.jfx.ui.history;
 
 import com.github.rcd47.x2data.explorer.file.HistoryFile;
-import com.github.rcd47.x2data.explorer.file.NonVersionedField;
 import com.github.rcd47.x2data.explorer.jfx.ui.NonVersionedFieldUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.prefs.GeneralPreferences;
 
@@ -19,13 +18,13 @@ public class HistoryFramesUI {
 		
 		var objectsTableUI = new HistoryObjectsTable(history, framesTable);
 		
-		var objectPropsTableUI = new ObjectPropertiesTable(framesTable, objectsTableUI.getObjectsTable());
+		var objectPropsTableUI = new ObjectPropertiesTable(framesTable, objectsTableUI.getObjectsTable(), history.getInterner());
 		
 		var contextPropsUI = new NonVersionedFieldUI(
 				GeneralPreferences.getEffective().getHistoryContextPropsTreeExpanded(),
 				"Click a frame to view its context's properties");
 		contextPropsUI.getRootProperty().bind(
-				framesTable.getSelectionModel().selectedItemProperty().map(f -> NonVersionedField.convertToTreeItems(f.getContext().getFields())));
+				framesTable.getSelectionModel().selectedItemProperty().map(f -> f.getContext().getTree(history.getInterner())));
 		
 		var framesSplit = new SplitPane(framesTableUI.getNode(), contextPropsUI.getNode());
 		framesSplit.setOrientation(Orientation.HORIZONTAL);

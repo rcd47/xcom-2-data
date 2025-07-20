@@ -13,7 +13,6 @@ import com.github.rcd47.x2data.explorer.file.GameStateObject;
 import com.github.rcd47.x2data.explorer.file.HistoryFile;
 import com.github.rcd47.x2data.explorer.file.HistorySingletonObject;
 import com.github.rcd47.x2data.explorer.file.ISizedObject;
-import com.github.rcd47.x2data.explorer.file.NonVersionedField;
 import com.github.rcd47.x2data.explorer.jfx.ui.NonVersionedFieldUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.ProgressUtils;
 import com.github.rcd47.x2data.explorer.jfx.ui.StandardCellFactoryHelper;
@@ -61,7 +60,7 @@ public class HistoryBloatAnalysisUI {
 					var context = frame.getContext();
 					perContextClassStatsMap.computeIfAbsent(context.getType(), _ -> new IntSummaryStatistics()).accept(context.getSizeInFile());
 					largestContexts.add(context);
-					for (var gso : frame.getObjects().values()) {
+					for (var gso : frame.getObjectsCombined().values()) {
 						if (gso.getFrame().equals(frame)) {
 							perObjectStatsMap.computeIfAbsent(gso.getObjectId(), _ -> new GameStateObjectStats()).add(gso);
 							(gso.getPreviousVersion() == null ? largestFullObjects : largestDeltaObjects).add(gso);
@@ -178,7 +177,8 @@ public class HistoryBloatAnalysisUI {
 				deltaObjectsTable.getColumns().addAll(
 						colDeltaObjId, colDeltaObjType, colDeltaSize, colDeltaObjSummary, colDeltaFrameNum, colDeltaCtxSummary);
 				
-				var deltaSplitPane = new SplitPane(deltaObjectsTable, new ObjectPropertiesTable(null, deltaObjectsTable).getNode());
+				var deltaSplitPane = new SplitPane(
+						deltaObjectsTable, new ObjectPropertiesTable(null, deltaObjectsTable, history.getInterner()).getNode());
 				deltaSplitPane.setOrientation(Orientation.HORIZONTAL);
 				
 				// largest full objects
@@ -206,7 +206,8 @@ public class HistoryBloatAnalysisUI {
 				fullObjectsTable.getColumns().addAll(
 						colFullObjId, colFullObjType, colFullSize, colFullObjSummary, colFullFrameNum, colFullCtxSummary);
 				
-				var fullSplitPane = new SplitPane(fullObjectsTable, new ObjectPropertiesTable(null, fullObjectsTable).getNode());
+				var fullSplitPane = new SplitPane(
+						fullObjectsTable, new ObjectPropertiesTable(null, fullObjectsTable, history.getInterner()).getNode());
 				fullSplitPane.setOrientation(Orientation.HORIZONTAL);
 				
 				// largest contexts
@@ -231,7 +232,7 @@ public class HistoryBloatAnalysisUI {
 						GeneralPreferences.getEffective().getHistoryContextPropsTreeExpanded(),
 						"Click a context to view its properties");
 				ctxProperties.getRootProperty().bind(
-						ctxTable.getSelectionModel().selectedItemProperty().map(f -> NonVersionedField.convertToTreeItems(f.getFields())));
+						ctxTable.getSelectionModel().selectedItemProperty().map(f -> f.getTree(history.getInterner())));
 				
 				var ctxSplitPane = new SplitPane(ctxTable, ctxProperties.getNode());
 				ctxSplitPane.setOrientation(Orientation.HORIZONTAL);
@@ -257,7 +258,7 @@ public class HistoryBloatAnalysisUI {
 						GeneralPreferences.getEffective().getHistorySingletonPropsTreeExpanded(),
 						"Click a singleton state to view its properties");
 				singletonPropsUI.getRootProperty().bind(
-						singletonsTable.getSelectionModel().selectedItemProperty().map(f -> NonVersionedField.convertToTreeItems(f.getFields())));
+						singletonsTable.getSelectionModel().selectedItemProperty().map(f -> f.getTree()));
 				
 				var singletonSplitPane = new SplitPane(singletonsTable, singletonPropsUI.getNode());
 				singletonSplitPane.setOrientation(Orientation.HORIZONTAL);

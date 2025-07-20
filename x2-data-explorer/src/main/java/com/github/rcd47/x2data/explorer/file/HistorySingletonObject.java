@@ -1,9 +1,11 @@
 package com.github.rcd47.x2data.explorer.file;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.github.rcd47.x2data.explorer.file.data.PrimitiveInterner;
+import com.github.rcd47.x2data.explorer.file.data.X2VersionedDatumTreeItem;
+import com.github.rcd47.x2data.explorer.file.data.X2VersionedMap;
 import com.github.rcd47.x2data.lib.unreal.mappings.UnrealName;
+
+import javafx.scene.control.TreeItem;
 
 public class HistorySingletonObject implements ISizedObject {
 	
@@ -13,15 +15,14 @@ public class HistorySingletonObject implements ISizedObject {
 	private final int firstFrame;
 	private final int objectId;
 	private final UnrealName type;
-	private final Map<UnrealName, NonVersionedField> fields;
+	private final TreeItem<X2VersionedDatumTreeItem> tree;
 	
-	public HistorySingletonObject(int sizeInFile, int firstFrame, GenericObject object) {
+	public HistorySingletonObject(int sizeInFile, int firstFrame, UnrealName type, X2VersionedMap properties, PrimitiveInterner interner) {
 		this.sizeInFile = sizeInFile;
 		this.firstFrame = firstFrame;
-		objectId = (int) object.properties.get(OBJECT_ID);
-		type = object.type;
-		fields = new HashMap<>();
-		object.properties.forEach((k, v) -> fields.put(k, new NonVersionedField(v)));
+		this.type = type;
+		objectId = (int) properties.getValueAt(0).get(OBJECT_ID);
+		tree = properties.getTreeNodeAt(interner, null, 0, false);
 	}
 
 	@Override
@@ -41,8 +42,8 @@ public class HistorySingletonObject implements ISizedObject {
 		return type;
 	}
 
-	public Map<UnrealName, NonVersionedField> getFields() {
-		return fields;
+	public TreeItem<X2VersionedDatumTreeItem> getTree() {
+		return tree;
 	}
 	
 }

@@ -3,11 +3,12 @@ package com.github.rcd47.x2data.explorer.jfx.ui.history;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.function.ToIntFunction;
 
 import com.github.rcd47.x2data.explorer.file.GameStateObject;
-import com.github.rcd47.x2data.explorer.file.GameStateObjectField;
-import com.github.rcd47.x2data.explorer.file.GameStateObjectFieldTreeNode;
 import com.github.rcd47.x2data.explorer.file.HistoryFrame;
+import com.github.rcd47.x2data.explorer.file.data.PrimitiveInterner;
+import com.github.rcd47.x2data.explorer.file.data.X2VersionedDatumTreeItem;
 import com.github.rcd47.x2data.explorer.jfx.ui.MultiSelectMenu;
 import com.github.rcd47.x2data.explorer.jfx.ui.StandardCellFactoryHelper;
 import com.github.rcd47.x2data.explorer.jfx.ui.TreeTableUtils;
@@ -36,66 +37,66 @@ public class ObjectPropertiesTable {
 	
 	private final TableView<HistoryFrame> framesTable;
 	private final TableView<GameStateObject> objectsTable;
-	private final TreeTableView<GameStateObjectFieldTreeNode> table;
+	private final TreeTableView<X2VersionedDatumTreeItem> table;
 	private final VBox vbox;
 	
-	public ObjectPropertiesTable(TableView<HistoryFrame> framesTable, TableView<GameStateObject> objectsTable) {
+	public ObjectPropertiesTable(TableView<HistoryFrame> framesTable, TableView<GameStateObject> objectsTable, PrimitiveInterner interner) {
 		this.framesTable = framesTable;
 		this.objectsTable = objectsTable;
 		
 		// early initialization
 		
-		table = new TreeTableView<GameStateObjectFieldTreeNode>();
+		table = new TreeTableView<>();
 		
 		// columns
 		
-		var columns = new EnumMap<ObjectPropertiesColumn, TreeTableColumn<GameStateObjectFieldTreeNode, ?>>(ObjectPropertiesColumn.class);
+		var columns = new EnumMap<ObjectPropertiesColumn, TreeTableColumn<X2VersionedDatumTreeItem, ?>>(ObjectPropertiesColumn.class);
 		
-		var colName = new TreeTableColumn<GameStateObjectFieldTreeNode, GameStateObjectFieldTreeNode>(
+		var colName = new TreeTableColumn<X2VersionedDatumTreeItem, X2VersionedDatumTreeItem>(
 				ObjectPropertiesColumn.NAME.getHeaderText());
 		colName.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue()));
 		colName.setCellFactory(_ -> new ObjectPropertyNameColumnCell());
 		colName.setUserData(ObjectPropertiesColumn.NAME);
 		columns.put(ObjectPropertiesColumn.NAME, colName);
 		
-		var colPrevValue = new TreeTableColumn<GameStateObjectFieldTreeNode, Object>(
+		var colPrevValue = new TreeTableColumn<X2VersionedDatumTreeItem, Object>(
 				ObjectPropertiesColumn.PREV_VALUE.getHeaderText());
 		colPrevValue.setCellValueFactory(f -> {
 			var field = f.getValue().getValue().getPreviousValue();
-			return field == null ? null : new ReadOnlyObjectWrapper<>(field.getValue());
+			return field == null ? null : new ReadOnlyObjectWrapper<>(field);
 		});
 		colPrevValue.setUserData(ObjectPropertiesColumn.PREV_VALUE);
 		StandardCellFactoryHelper.setFactoryForObjectValueColumn(colPrevValue);
 		columns.put(ObjectPropertiesColumn.PREV_VALUE, colPrevValue);
 		
-		var colCurrentValue = new TreeTableColumn<GameStateObjectFieldTreeNode, Object>(
+		var colCurrentValue = new TreeTableColumn<X2VersionedDatumTreeItem, Object>(
 				ObjectPropertiesColumn.CURRENT_VALUE.getHeaderText());
 		colCurrentValue.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue().getValue()));
 		colCurrentValue.setUserData(ObjectPropertiesColumn.CURRENT_VALUE);
 		StandardCellFactoryHelper.setFactoryForObjectValueColumn(colCurrentValue);
 		columns.put(ObjectPropertiesColumn.CURRENT_VALUE, colCurrentValue);
 		
-		var colNextValue = new TreeTableColumn<GameStateObjectFieldTreeNode, Object>(
+		var colNextValue = new TreeTableColumn<X2VersionedDatumTreeItem, Object>(
 				ObjectPropertiesColumn.NEXT_VALUE.getHeaderText());
 		colNextValue.setCellValueFactory(f -> {
 			var field = f.getValue().getValue().getNextValue();
-			return field == null ? null : new ReadOnlyObjectWrapper<>(field.getValue());
+			return field == null ? null : new ReadOnlyObjectWrapper<>(field);
 		});
 		colNextValue.setUserData(ObjectPropertiesColumn.NEXT_VALUE);
 		StandardCellFactoryHelper.setFactoryForObjectValueColumn(colNextValue);
 		columns.put(ObjectPropertiesColumn.NEXT_VALUE, colNextValue);
 		
-		var colPrevFrame = new TreeTableColumn<GameStateObjectFieldTreeNode, GameStateObjectField>(
+		var colPrevFrame = new TreeTableColumn<X2VersionedDatumTreeItem, X2VersionedDatumTreeItem>(
 				ObjectPropertiesColumn.PREV_FRAME.getHeaderText());
-		colPrevFrame.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue().getPreviousValue()));
-		colPrevFrame.setCellFactory(_ -> new ObjectPropertyFrameLinkColumnCell());
+		colPrevFrame.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue()));
+		colPrevFrame.setCellFactory(_ -> new ObjectPropertyFrameLinkColumnCell(Integer.MIN_VALUE, n -> n.getPreviousFrame()));
 		colPrevFrame.setUserData(ObjectPropertiesColumn.PREV_FRAME);
 		columns.put(ObjectPropertiesColumn.PREV_FRAME, colPrevFrame);
 		
-		var colNextFrame = new TreeTableColumn<GameStateObjectFieldTreeNode, GameStateObjectField>(
+		var colNextFrame = new TreeTableColumn<X2VersionedDatumTreeItem, X2VersionedDatumTreeItem>(
 				ObjectPropertiesColumn.NEXT_FRAME.getHeaderText());
-		colNextFrame.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue().getNextValue()));
-		colNextFrame.setCellFactory(_ -> new ObjectPropertyFrameLinkColumnCell());
+		colNextFrame.setCellValueFactory(f -> new ReadOnlyObjectWrapper<>(f.getValue().getValue()));
+		colNextFrame.setCellFactory(_ -> new ObjectPropertyFrameLinkColumnCell(Integer.MAX_VALUE, n -> n.getNextFrame()));
 		colNextFrame.setUserData(ObjectPropertiesColumn.NEXT_FRAME);
 		columns.put(ObjectPropertiesColumn.NEXT_FRAME, colNextFrame);
 		
@@ -134,7 +135,9 @@ public class ObjectPropertiesTable {
 		table.rootProperty().bind(Bindings.createObjectBinding(
 				() -> {
 					var object = objectsTable.getSelectionModel().getSelectedItem();
-					return object == null ? null : object.getFieldsAsTreeNode(modifiedCheckbox.isSelected());
+					return object == null ?
+							null :
+							object.getFields().getTreeNodeAt(interner, null, object.getFrame().getNumber(), modifiedCheckbox.isSelected());
 				},
 				modifiedCheckbox.selectedProperty(),
 				objectsTable.getSelectionModel().selectedItemProperty()));
@@ -150,13 +153,13 @@ public class ObjectPropertiesTable {
 		return vbox;
 	}
 	
-	private class ObjectPropertyNameColumnCell extends TreeTableCell<GameStateObjectFieldTreeNode, GameStateObjectFieldTreeNode> {
+	private class ObjectPropertyNameColumnCell extends TreeTableCell<X2VersionedDatumTreeItem, X2VersionedDatumTreeItem> {
 		public ObjectPropertyNameColumnCell() {
 			StandardCellFactoryHelper.configureCellForValueColumn(this);
 		}
 		
 		@Override
-		protected void updateItem(GameStateObjectFieldTreeNode item, boolean empty) {
+		protected void updateItem(X2VersionedDatumTreeItem item, boolean empty) {
 			super.updateItem(item, empty);
 			if (empty || item == null) {
 				setText(null);
@@ -175,47 +178,57 @@ public class ObjectPropertiesTable {
 		}
 	}
 	
-	private class ObjectPropertyFrameLinkColumnCell extends TreeTableCell<GameStateObjectFieldTreeNode, GameStateObjectField> {
+	private class ObjectPropertyFrameLinkColumnCell extends TreeTableCell<X2VersionedDatumTreeItem, X2VersionedDatumTreeItem> {
+		private final int nullValue;
+		private final ToIntFunction<X2VersionedDatumTreeItem> extractor;
+		
+		public ObjectPropertyFrameLinkColumnCell(int nullValue, ToIntFunction<X2VersionedDatumTreeItem> extractor) {
+			this.nullValue = nullValue;
+			this.extractor = extractor;
+		}
+
 		@Override
-		protected void updateItem(GameStateObjectField item, boolean empty) {
+		protected void updateItem(X2VersionedDatumTreeItem item, boolean empty) {
 			super.updateItem(item, empty);
-			if (empty || item == null) {
+			int frameNum = empty || item == null ? nullValue : extractor.applyAsInt(item);
+			if (frameNum == nullValue) {
 				if (framesTable == null) {
 					setText(null);
 				} else {
 					setGraphic(null);
 				}
 			} else {
-				var state = item.getLastChangedAt();
-				var frame = state.getFrame();
-				var frameNum = Integer.toString(frame.getNumber());
+				var frameStr = Integer.toString(frameNum);
 				if (framesTable == null) {
-					setText(frameNum);
+					setText(frameStr);
 				} else {
-					var link = new Hyperlink(frameNum);
+					var link = new Hyperlink(frameStr);
 					link.setOnAction(_ -> {
 						var path = new ArrayList<UnrealName>();
 						var treeItem = getTableRow().getTreeItem();
 						while (true) {
 							path.add(treeItem.getValue().getName());
 							treeItem = treeItem.getParent();
-							if (treeItem.getValue() == null) {
+							if (treeItem.getValue().getName() == null) {
 								// reached root node
 								break;
 							}
 						}
 						Collections.reverse(path);
 						
-						framesTable.getSelectionModel().select(frame);
+						var objectId = objectsTable.getSelectionModel().getSelectedItem().getObjectId();
+						
+						framesTable.getSelectionModel().select(frameNum - framesTable.getItems().getFirst().getNumber());
 						framesTable.scrollTo(framesTable.getSelectionModel().getSelectedIndex());
-						objectsTable.getSelectionModel().select(state);
+						
+						var frame = framesTable.getSelectionModel().getSelectedItem();
+						objectsTable.getSelectionModel().select(frame.getObject(objectId));
 						objectsTable.scrollTo(objectsTable.getSelectionModel().getSelectedIndex());
 						
 						var newTreeItem = table.getRoot();
 						for (var element : path) {
 							newTreeItem.setExpanded(true);
 							newTreeItem = newTreeItem.getChildren().stream().filter(i -> i.getValue().getName().equals(element)).findAny().get();
-							
 						}
 						table.getSelectionModel().select(newTreeItem);
 						table.scrollTo(table.getSelectionModel().getSelectedIndex());
