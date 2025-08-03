@@ -70,9 +70,24 @@
 				<version>1.18.0</version>
 			</dependency>
 			<dependency>
+				<groupId>io.smallrye</groupId>
+				<artifactId>jandex</artifactId>
+				<version>${version.io.smallrye.jandex}</version>
+			</dependency>
+			<dependency>
+				<groupId>it.unimi.dsi</groupId>
+				<artifactId>fastutil</artifactId>
+				<version>8.5.16</version>
+			</dependency>
+			<dependency>
 				<groupId>org.anarres.lzo</groupId>
 				<artifactId>lzo-core</artifactId>
 				<version>1.0.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.groovy</groupId>
@@ -83,11 +98,6 @@
 				<groupId>org.openjfx</groupId>
 				<artifactId>javafx-controls</artifactId>
 				<version>24.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>io.smallrye</groupId>
-				<artifactId>jandex</artifactId>
-				<version>${version.io.smallrye.jandex}</version>
 			</dependency>
 
 			<!-- Testing deps -->

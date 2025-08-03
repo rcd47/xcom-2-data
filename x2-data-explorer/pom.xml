@@ -36,6 +36,14 @@
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>it.unimi.dsi</groupId>
+			<artifactId>fastutil</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.groovy</groupId>
 			<artifactId>groovy</artifactId>
 		</dependency>
@@ -138,6 +146,11 @@
 								<addModule>java.desktop</addModule>
 								<addModule>java.logging</addModule>
 							</addModules>
+							<javaOptions>
+								<!-- -XX:+UnlockExperimentalVMOptions will not be needed in Java 25+ (see JEP 519) -->
+								<javaOption>-XX:+UnlockExperimentalVMOptions</javaOption>
+								<javaOption>-XX:+UseCompactObjectHeaders</javaOption>
+							</javaOptions>
 							<mainJar>${project.build.finalName}.${project.packaging}</mainJar>
 							<mainClass>com.github.rcd47.x2data.explorer.jfx.MainLauncher</mainClass>
 							<name>X2 Data Explorer</name>

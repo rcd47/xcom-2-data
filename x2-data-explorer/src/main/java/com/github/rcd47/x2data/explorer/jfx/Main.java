@@ -11,16 +11,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.rcd47.x2data.explorer.file.GenericObjectVisitor;
 import com.github.rcd47.x2data.explorer.file.HistoryFileReader;
-import com.github.rcd47.x2data.explorer.file.NonVersionedField;
+import com.github.rcd47.x2data.explorer.file.data.PrimitiveInterner;
+import com.github.rcd47.x2data.explorer.file.data.VersionedObjectVisitor;
+import com.github.rcd47.x2data.explorer.file.data.X2VersionedDatumTreeItem;
+import com.github.rcd47.x2data.explorer.file.data.X2VersionedMap;
 import com.github.rcd47.x2data.explorer.jfx.ui.NonVersionedFieldUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.ProgressUtils;
 import com.github.rcd47.x2data.explorer.jfx.ui.history.HistoryBloatAnalysisUI;
@@ -339,13 +340,16 @@ public class Main extends Application {
 	
 	private void parseBasicSaveObjectFile(
 			UnrealObjectParser parser, UnrealName type, VBox splitLeft, NonVersionedFieldUI objPropsUI, ByteBuffer buffer) {
-		var task = new Task<TreeItem<Map.Entry<UnrealName, NonVersionedField>>>() {
+		var task = new Task<TreeItem<X2VersionedDatumTreeItem>>() {
 			@Override
-			protected TreeItem<Map.Entry<UnrealName, NonVersionedField>> call() throws Exception {
+			protected TreeItem<X2VersionedDatumTreeItem> call() throws Exception {
 				buffer.rewind();
-				var visitor = new GenericObjectVisitor(null);
+				var interner = new PrimitiveInterner();
+				var visitor = new VersionedObjectVisitor(interner);
+				var parsedObject = new X2VersionedMap(0);
+				visitor.setRootObject(0, parsedObject);
 				parser.parse(type, buffer, visitor);
-				return NonVersionedField.convertToTreeItems(new NonVersionedField(visitor.getRootObject()).getChildren());
+				return parsedObject.getTreeNodeAt(interner, type, 0, false);
 			}
 
 			@Override

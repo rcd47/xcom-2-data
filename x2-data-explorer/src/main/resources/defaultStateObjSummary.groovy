@@ -3,36 +3,36 @@
 
 // XComGameState_Ability, XComGameState_Item, and their subclasses
 if (gso.m_TemplateName && gso.OwnerStateObject) {
-	return gso.m_TemplateName.value.original + ' for ' + gso.OwnerStateObject.ObjectID.value
+	return gso.m_TemplateName.original + ' for ' + gso.OwnerStateObject.ObjectID
 }
 
 // XComGameState_Effect and subclasses
 if (gso.ApplyEffectParameters) {
 	def source;
 	if (gso.ApplyEffectParameters.EffectRef.SourceTemplateName) {
-		source = gso.ApplyEffectParameters.EffectRef.SourceTemplateName.value.original
+		source = gso.ApplyEffectParameters.EffectRef.SourceTemplateName.original
 	} else {
-		source = gso.ApplyEffectParameters.EffectRef.LookupType.value.original
+		source = gso.ApplyEffectParameters.EffectRef.LookupType.original
 	}
 	if (gso.ApplyEffectParameters.SourceStateObjectRef) { // effects applied by XCGSC_UpdateWorldEffects do not have a source
-		source += ' by ' + gso.ApplyEffectParameters.SourceStateObjectRef.ObjectID.value
+		source += ' by ' + gso.ApplyEffectParameters.SourceStateObjectRef.ObjectID
 	}
-	return source + ' on ' + gso.ApplyEffectParameters.TargetStateObjectRef.ObjectID.value
+	return source + ' on ' + gso.ApplyEffectParameters.TargetStateObjectRef.ObjectID
 }
 
 // XComGameState_Unit
 if (gso.strFirstName || gso.strLastName) {
-	return gso.strFirstName?.value + ' ' + gso.strLastName?.value
+	return gso.strFirstName + ' ' + gso.strLastName
 } else if (gso.m_SoldierClassTemplateName) {
-	return gso.m_SoldierClassTemplateName.value.original
+	return gso.m_SoldierClassTemplateName.original
 }
 
 // XComGameState_Player
 if (gso.TeamFlag) {
-	return gso.TeamFlag.value.original
+	return gso.TeamFlag.original
 }
 
 // fallback. lots of the stock objects have m_TemplateName.
 if (gso.m_TemplateName) {
-	return gso.m_TemplateName.value.original
+	return gso.m_TemplateName.original
 }

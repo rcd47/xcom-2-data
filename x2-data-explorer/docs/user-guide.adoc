@@ -75,9 +75,8 @@ For expressions on frames, `f` is the candidate frame. It is a `com.github.rcd47
 
 For a given frame or object to match the expression, the expression must return a result that is https://groovy-lang.org/semantics.html#the-groovy-truth[truthy as defined by Groovy]. This means that the result does not have to be a boolean. E.g. to find any object that contains a `m_template` field, you could simply search for `o.m_template`.
 
-IMPORTANT: When writing expressions to filter on fields within a game state object, remember that each field in the tree is a `com.github.rcd47.x2data.explorer.file.GameStateObjectField`, and the value must be accessed explicitly. E.g. to find a soldier whose first name is Ben, your filter would need to be `o.strFirstName.value == 'Ben'`, not just `o.strFirstName == 'Ben'`.
 
-IMPORTANT: When writing expressions to match fields that are Unreal names, remember that the name is a `com.github.rcd47.x2data.lib.unreal.mappings.UnrealName`, and the value must be accessed through the `original` or `normalized` fields. E.g. to find the eastern US region, your filter would need to be `o.m_TemplateName.value.original == 'WorldRegion_EastNA'`, not just `o.m_TemplateName.value == 'WorldRegion_EastNA'`.
+IMPORTANT: When writing expressions to match fields that are Unreal names, remember that the name is a `com.github.rcd47.x2data.lib.unreal.mappings.UnrealName`, and the value must be accessed through the `original` or `normalized` fields. E.g. to find the eastern US region, your filter would need to be `o.m_TemplateName.original == 'WorldRegion_EastNA'`, not just `o.m_TemplateName == 'WorldRegion_EastNA'`.
 
 ==== Context and Object Summaries
 

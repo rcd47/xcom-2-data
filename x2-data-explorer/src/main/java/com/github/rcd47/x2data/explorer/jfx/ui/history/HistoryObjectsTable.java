@@ -117,7 +117,7 @@ public class HistoryObjectsTable {
 					var selectedFrame = framesTable.getSelectionModel().selectedItemProperty().get();
 					return selectedFrame == null ? null : FXCollections.observableList(
 							selectedFrame
-							.getObjects()
+							.getObjectsCombined()
 							.values()
 							.stream()
 							.filter(filters.getProperty().get())

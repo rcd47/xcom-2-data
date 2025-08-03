@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import com.github.rcd47.x2data.explorer.file.HistoryFile;
 import com.github.rcd47.x2data.explorer.file.HistorySingletonObject;
-import com.github.rcd47.x2data.explorer.file.NonVersionedField;
 import com.github.rcd47.x2data.explorer.jfx.ui.NonVersionedFieldUI;
 import com.github.rcd47.x2data.explorer.jfx.ui.StandardCellFactoryHelper;
 import com.github.rcd47.x2data.explorer.jfx.ui.prefs.GeneralPreferences;
@@ -54,9 +53,8 @@ public class HistoryGeneralUI {
 			}
 		}
 		
-		var history = historyFile.getHistory();
-		headers.add(new HeaderPair("Current random seed", Integer.toString(history.CurrRandomSeed)));
-		headers.add(new HeaderPair("# of archived frames", Integer.toString(history.NumArchivedFrames)));
+		headers.add(new HeaderPair("Current random seed", Integer.toString(historyFile.getRandomSeed())));
+		headers.add(new HeaderPair("# of archived frames", Integer.toString(historyFile.getNumArchivedFrames())));
 		
 		// headers table
 		
@@ -90,7 +88,7 @@ public class HistoryGeneralUI {
 				GeneralPreferences.getEffective().getHistorySingletonPropsTreeExpanded(),
 				"Click a singleton state to view its properties");
 		singletonPropsUI.getRootProperty().bind(
-				singletonsTable.getSelectionModel().selectedItemProperty().map(f -> NonVersionedField.convertToTreeItems(f.getFields())));
+				singletonsTable.getSelectionModel().selectedItemProperty().map(f -> f.getTree()));
 		
 		// top-level layout
 		

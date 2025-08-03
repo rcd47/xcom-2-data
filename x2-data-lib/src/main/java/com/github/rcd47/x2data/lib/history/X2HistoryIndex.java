@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import com.github.rcd47.x2data.lib.unreal.IUnrealObjectVisitor;
 import com.github.rcd47.x2data.lib.unreal.UnrealFileParseException;
@@ -27,7 +27,7 @@ public class X2HistoryIndex implements Closeable {
 	private UnrealObjectParser objectParser;
 	private UnrealObjectMapper objectMapper;
 	private int largestEntrySize;
-	private Deque<ByteBuffer> bufferCache;
+	private BlockingQueue<ByteBuffer> bufferCache;
 	
 	X2HistoryIndex(FileChannel file, boolean createdByWOTC, List<X2HistoryIndexEntry> entries, Map<UnrealName, UnrealTypeInformer> typings) {
 		this.file = file;
@@ -37,7 +37,7 @@ public class X2HistoryIndex implements Closeable {
 		objectParser = new UnrealObjectParser(true, typings);
 		objectMapper = new UnrealObjectMapper(objectParser);
 		largestEntrySize = entries.stream().mapToInt(X2HistoryIndexEntry::getLength).max().getAsInt();
-		bufferCache = new ArrayDeque<>();
+		bufferCache = new ArrayBlockingQueue<>(Runtime.getRuntime().availableProcessors());
 	}
 	
 	public X2HistoryIndexEntry getEntry(int index) {
@@ -54,7 +54,7 @@ public class X2HistoryIndex implements Closeable {
 		} catch (Exception e) {
 			throw buildParseException(entry, e);
 		} finally {
-			bufferCache.offerFirst(buffer);
+			bufferCache.offer(buffer);
 		}
 	}
 	
@@ -65,7 +65,7 @@ public class X2HistoryIndex implements Closeable {
 		} catch (Exception e) {
 			throw buildParseException(entry, e);
 		} finally {
-			bufferCache.offerFirst(buffer);
+			bufferCache.offer(buffer);
 		}
 	}
 	
@@ -81,14 +81,13 @@ public class X2HistoryIndex implements Closeable {
 			throw new IllegalArgumentException("Entry does not belong to this index");
 		}
 		
-		var buffer = bufferCache.pollFirst();
+		var buffer = bufferCache.poll();
 		if (buffer == null) {
 			buffer = ByteBuffer.allocate(largestEntrySize).order(ByteOrder.LITTLE_ENDIAN);
 		}
 		buffer.position(0).limit(entry.getLength());
 		
-		file.position(entry.getPosition());
-		file.read(buffer);
+		file.read(buffer, entry.getPosition());
 		
 		return buffer.flip();
 	}
