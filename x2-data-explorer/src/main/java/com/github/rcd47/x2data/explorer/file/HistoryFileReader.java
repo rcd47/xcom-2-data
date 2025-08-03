@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -41,10 +42,12 @@ public class HistoryFileReader {
 	
 	private static final double PROGRESS_BAR_PHASES = 4;
 	private static final UnrealName OBJECT_ID = new UnrealName("ObjectID");
-	private static final UnrealName PREV_FRAME_HIST_INDEX = new UnrealName("PreviousHistoryFrameIndex");
 	private static final String PROBLEM_MODIFIED_OLD_STATE = """
-			Found object of type %s with no ObjectID and PreviousHistoryFrameIndex pointing to the future (frame %d).
+			Found object of type %s with no ObjectID.
 			This is caused by code modifying a state that has already been submitted instead of modifying a new state.""";
+	private static final String PROBLEM_UNKNOWN_PREV_INDEX_CORRUPTION = """
+			Found object of type %s at position %d with length %d that has previous version index %d, but that index was not found.
+			This problem has not been observed before. Please report it on GitHub and attach the file that causes it.""";
 	
 	public HistoryFile read(FileChannel in, DoubleConsumer progressPercentCallback, Consumer<String> progressTextCallback) throws Exception {
 		var decompressedFile = Files.createTempFile("x2hist", null);
@@ -78,6 +81,9 @@ public class HistoryFileReader {
 				var detectedSingletonTypes = new HashSet<UnrealName>();
 				var objectTypes = new HashSet<UnrealName>();
 				var contextTypes = new HashSet<UnrealName>();
+				var interner = new PrimitiveInterner();
+				var visitor = new VersionedObjectVisitor(interner);
+				var problemsDetected = Collections.synchronizedList(new ArrayList<HistoryFileProblem>());
 				for (int i = 0; i < numFrames; i++) {
 					progressTextCallback.accept("Inspecting history frame " + currentFrameNum++);
 					XComGameState rawFrame = historyIndex.mapObject(
@@ -105,6 +111,26 @@ public class HistoryFileReader {
 							objectTypes.add(fileEntry.getType());
 						} else {
 							chain = objectStateChains.remove(prevIndex);
+							if (chain == null) { // broken objects have been written into the file
+								var parsedObject = new X2VersionedMap(0);
+								visitor.setRootObject(0, parsedObject);
+								historyIndex.parseObject(fileEntry, visitor);
+								var parsedObjectFields = parsedObject.getValueAt(0);
+								if (!detectModifyingOldState(parsedObjectFields, parsedFrames[i], fileEntry, problemsDetected)) {
+									// a problem we haven't seen before
+									problemsDetected.add(new HistoryFileProblem(
+											parsedFrames[i],
+											null,
+											null,
+											String.format(
+													PROBLEM_UNKNOWN_PREV_INDEX_CORRUPTION,
+													fileEntry.getType().getOriginal(),
+													fileEntry.getPosition(),
+													fileEntry.getLength(),
+													prevIndex)));
+								}
+								continue;
+							}
 						}
 						chain.add(new GameStateObjectState(fileEntry, parsedFrames[i]));
 						objectStateChains.put(entryIndex, chain);
@@ -130,8 +156,6 @@ public class HistoryFileReader {
 				progressTextCallback.accept("Preparing to parse objects");
 				var stateObjectQueueSize = stateObjectQueue.size();
 				var objectCounter = new AtomicInteger(stateObjectQueueSize);
-				var interner = new PrimitiveInterner();
-				var problemsDetected = Collections.synchronizedList(new ArrayList<HistoryFileProblem>());
 				readInParallel(
 						"GSO Parser ",
 						() -> readGameStateObjects(
@@ -186,7 +210,6 @@ public class HistoryFileReader {
 				
 				// parse singletons
 				progressTextCallback.accept("Parsing singletons");
-				var visitor = new VersionedObjectVisitor(interner);
 				var singletons = singletonStates
 						.stream()
 						.map(state -> {
@@ -224,7 +247,7 @@ public class HistoryFileReader {
 	
 	private void readInParallel(String threadNamePrefix, FailableRunnable<Throwable> task) throws Exception {
 		var errorRef = new AtomicReference<Throwable>();
-		int numThreads = Runtime.getRuntime().availableProcessors() / 2; // TODO should be configurable
+		int numThreads = Math.max(1, Runtime.getRuntime().availableProcessors() / 2); // TODO should be configurable
 		var threads = new Thread[numThreads];
 		for (int i = 0; i < numThreads; i++) {
 			threads[i] = new Thread(
@@ -295,21 +318,7 @@ public class HistoryFileReader {
 				visitor.setRootObject(frameNum, parsedObject);
 				historyIndex.parseObject(state.fileEntry, visitor);
 				var parsedObjectFields = parsedObject.getValueAt(frameNum);
-				if (parsedObjectFields.get(OBJECT_ID) == null &&
-						(int) parsedObjectFields.get(PREV_FRAME_HIST_INDEX) > frameNum) {
-					// object has no ID and previous frame index points to the future
-					// this is a sign of https://github.com/rcd47/xcom-2-data/issues/2
-					// note that in this situation, the previousVersionIndex above is -1
-					// so we are not corrupting our tracking of any objects by doing parseObject()
-					problemsDetected.add(new HistoryFileProblem(
-							state.frame,
-							null,
-							null,
-							String.format(
-									PROBLEM_MODIFIED_OLD_STATE,
-									state.fileEntry.getType().getOriginal(),
-									parsedObjectFields.get(PREV_FRAME_HIST_INDEX))));
-				} else {
+				if (!detectModifyingOldState(parsedObjectFields, state.frame, state.fileEntry, problemsDetected)) {
 					previousVersion = new GameStateObject(
 							state.fileEntry.getLength(), previousVersion, parsedObject, state.fileEntry.getType(),
 							state.frame, interner, ScriptPreferences.STATE_OBJECT_SUMMARY.getExecutable(), problemsDetected);
@@ -321,6 +330,26 @@ public class HistoryFileReader {
 			progressTextCallback.accept("Parsing objects. " + remaining + " remaining.");
 			progressPercentCallback.accept(0.25 + ((1 - (((double) remaining) / objectsTotal)) / PROGRESS_BAR_PHASES));
 		}
+	}
+	
+	private boolean detectModifyingOldState(
+			Map<Object, Object> parsedObjectFields, HistoryFrame frame,
+			X2HistoryIndexEntry fileEntry, List<HistoryFileProblem> problemsDetected) {
+		if (parsedObjectFields.get(OBJECT_ID) == null) {
+			// object has no ID
+			// this is a sign of https://github.com/rcd47/xcom-2-data/issues/2
+			// originally I only noticed it with PreviousHistoryFrameIndex pointing to the future
+			// previousVersionIndex was always -1 in that case
+			// but now I have also seen cases where PreviousHistoryFrameIndex correctly points to the past
+			// in that situation, previousVersionIndex apparently still points to an object in a future frame
+			problemsDetected.add(new HistoryFileProblem(
+					frame,
+					null,
+					null,
+					String.format(PROBLEM_MODIFIED_OLD_STATE, fileEntry.getType().getOriginal())));
+			return true;
+		}
+		return false;
 	}
 	
 	private static class GameStateObjectState {
