@@ -125,7 +125,7 @@ public class X2SaveGameReader {
 		header.campaignNumber = buffer.getInt();
 		header.saveSlot = buffer.getInt();
 		header.description = UnrealUtils.readString(buffer);
-		header.creationTime = LocalDateTime.parse(UnrealUtils.readString(buffer), DateTimeFormatter.ofPattern("M/d/y\nH:mm"));
+		var creationTimeString = UnrealUtils.readString(buffer);
 		header.mapCommand = UnrealUtils.readString(buffer);
 		header.tacticalSave = buffer.getInt() == 1;
 		header.ironmanEnabled = buffer.getInt() == 1;
@@ -136,6 +136,11 @@ public class X2SaveGameReader {
 		header.campaignStartTime = LocalDateTime.parse(UnrealUtils.readString(buffer), DateTimeFormatter.ofPattern("yyyy.MM.dd-HH.mm.ss"));
 		header.mapImage = UnrealUtils.readString(buffer);
 		header.name = UnrealUtils.readString(buffer);
+
+		// creation time has different format depending on locale
+		header.creationTime = LocalDateTime.parse(
+				creationTimeString,
+				DateTimeFormatter.ofPattern("CHN".equals(header.language) ? "y M d\nH:mm" : "M/d/y\nH:mm"));
 		
 		int dlcCount = buffer.getInt();
 		header.installedDlcAndMods = new ArrayList<>(dlcCount);
