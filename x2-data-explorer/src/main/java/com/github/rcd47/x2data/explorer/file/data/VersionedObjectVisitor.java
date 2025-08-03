@@ -42,7 +42,7 @@ public class VersionedObjectVisitor implements IUnrealObjectVisitor {
 					stateStack.push(VisitorState.MAP_KEY);
 					var parentUntyped = objectStack.peek();
 					if (parentUntyped instanceof X2VersionedMap parent) {
-						objectStack.push(parent.getOrCreateChild(frame, nextMapKey, () -> new X2VersionedMap(frame)));
+						objectStack.push(parent.getOrCreateChild(frame, nextMapKey, nextStaticArrayIndex, () -> new X2VersionedMap(frame)));
 					} else if (parentUntyped instanceof X2VersionedStaticArray parent) {
 						objectStack.push(parent.getOrCreateElement(frame, nextStaticArrayIndex, () -> new X2VersionedMap(frame)));
 					} else {
@@ -70,7 +70,7 @@ public class VersionedObjectVisitor implements IUnrealObjectVisitor {
 			case MAP_VALUE -> {
 				stateStack.push(VisitorState.MAP_KEY);
 				objectStack.push(((X2VersionedMap) objectStack.peek())
-						.getOrCreateChild(frame, nextMapKey, () -> new X2VersionedDynamicArray(frame, size)));
+						.getOrCreateChild(frame, nextMapKey, nextStaticArrayIndex, () -> new X2VersionedDynamicArray(frame, size)));
 			}
 			default -> throw new IllegalStateException("Invalid state for dynamic array start " + stateStack.peek());
 		}
@@ -100,7 +100,9 @@ public class VersionedObjectVisitor implements IUnrealObjectVisitor {
 		// if their mem usage is a problem, creating proper mappings would probably be a better solution
 		data = ByteBuffer.allocate(data.remaining()).order(ByteOrder.LITTLE_ENDIAN).put(data).flip();
 		if (stateStack.peek() == VisitorState.MAP_KEY) {
-			((X2VersionedMap) objectStack.peek()).setPrimitiveValue(frame, "native vars", data, 0);
+			((X2VersionedMap) objectStack.peek())
+					.getOrCreateChild(frame, "native vars", 0, () -> new X2VersionedPrimitive())
+					.setValueAt(frame, data);
 		} else {
 			visitPrimitiveValue(data);
 		}
@@ -203,7 +205,9 @@ public class VersionedObjectVisitor implements IUnrealObjectVisitor {
 				stateStack.push(VisitorState.MAP_VALUE);
 			}
 			case MAP_VALUE -> {
-				((X2VersionedMap) objectStack.peek()).setPrimitiveValue(frame, nextMapKey, value, nextStaticArrayIndex);
+				((X2VersionedMap) objectStack.peek())
+						.getOrCreateChild(frame, nextMapKey, nextStaticArrayIndex, () -> new X2VersionedPrimitive())
+						.setValueAt(frame, value);
 				stateStack.push(VisitorState.MAP_KEY);
 			}
 			case ARRAY_ELEMENT -> {

@@ -19,35 +19,25 @@ public class X2VersionedMap extends X2VersionedDataContainer<Map<Object, Object>
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T extends X2VersionedDatum<?>> T getOrCreateChild(int frame, Object key, Supplier<T> creator) {
-		var child = children.computeIfAbsent(key, _ -> {
-			var created = creator.get();
-			created.parent = this;
-			return created;
-		});
-		child.lastFrameTouched = frame;
-		return (T) child;
-	}
-	
-	public void setPrimitiveValue(int frame, Object key, Object value, int staticArrayIndex) {
+	public <T extends X2VersionedDatum<?>> T getOrCreateChild(int frame, Object key, int staticArrayIndex, Supplier<T> creator) {
 		var datum = children.get(key);
 		
 		if (staticArrayIndex == 0) {
 			if (datum == null) {
-				datum = new X2VersionedPrimitive();
+				datum = creator.get();
 				datum.parent = this;
 				children.put(key, datum);
 			}
-			if (datum instanceof X2VersionedPrimitive primitive) {
-				primitive.setValueAt(frame, value);
-				return;
+			if (!(datum instanceof X2VersionedStaticArray)) {
+				datum.lastFrameTouched = frame;
+				return (T) datum;
 			}
 		}
 		
 		X2VersionedStaticArray array;
 		if (datum instanceof X2VersionedStaticArray datumArray) {
 			array = datumArray;
-		} else { // must be null or primitive
+		} else { // could be null, primitive, or struct
 			array = new X2VersionedStaticArray(frame, staticArrayIndex + 1);
 			array.parent = this;
 			children.put(key, array);
@@ -56,9 +46,8 @@ public class X2VersionedMap extends X2VersionedDataContainer<Map<Object, Object>
 				array.getOrCreateElement(frame, 0, () -> datumFinal); // will always create
 			}
 		}
-		
 		array.lastFrameTouched = frame;
-		array.getOrCreateElement(frame, staticArrayIndex, () -> new X2VersionedPrimitive()).setValueAt(frame, value);
+		return array.getOrCreateElement(frame, staticArrayIndex, creator);
 	}
 
 	@Override

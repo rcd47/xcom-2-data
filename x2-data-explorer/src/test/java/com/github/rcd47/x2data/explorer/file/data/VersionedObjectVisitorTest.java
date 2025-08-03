@@ -220,6 +220,130 @@ public class VersionedObjectVisitorTest {
 	}
 	
 	@Test
+	public void testStaticArrayWithNestedStruct() {
+		var vmap = new X2VersionedMap(1);
+		var visitor = new VersionedObjectVisitor(new PrimitiveInterner());
+		
+		visitor.setRootObject(1, vmap);
+		visitor.visitStructStart(null);
+		visitor.visitProperty(new UnrealName("a"), 2);
+		visitor.visitStructStart(null);
+		visitor.visitProperty(new UnrealName("aa"), 0);
+		visitor.visitIntValue(11);
+		visitor.visitStructEnd();
+		visitor.visitStructEnd();
+		
+		visitor.setRootObject(2, vmap);
+		visitor.visitStructStart(null);
+		visitor.visitProperty(new UnrealName("a"), 1);
+		visitor.visitStructStart(null);
+		visitor.visitProperty(new UnrealName("aa"), 0);
+		visitor.visitIntValue(33);
+		visitor.visitStructEnd();
+		visitor.visitStructEnd();
+		
+		visitor.setRootObject(3, vmap);
+		visitor.visitStructStart(null);
+		visitor.visitProperty(new UnrealName("a"), 2);
+		visitor.visitStructStart(null);
+		visitor.visitProperty(new UnrealName("aa"), 0);
+		visitor.visitIntValue(55);
+		visitor.visitStructEnd();
+		visitor.visitStructEnd();
+		
+		assertThat(vmap.getValueAt(1)).usingRecursiveComparison().isEqualTo(Map.of("a", Arrays.asList(null, null, Map.of("aa", 11))));
+		assertThat(vmap.getValueAt(2)).usingRecursiveComparison().isEqualTo(Map.of("a", Arrays.asList(null, Map.of("aa", 33), Map.of("aa", 11))));
+		assertThat(vmap.getValueAt(3)).usingRecursiveComparison().isEqualTo(Map.of("a", Arrays.asList(null, Map.of("aa", 33), Map.of("aa", 55))));
+		
+		// tree node at frame 1
+		var treeRoot = vmap.getTreeNodeAt(new PrimitiveInterner(), new UnrealName("test"), 1, false);
+		assertThat(treeRoot.getChildren()).hasSize(1);
+		assertThat(treeRoot.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("test"), null, FieldChangeType.ADDED, null, null, Integer.MIN_VALUE, 2));
+		var treeA = findTreeItem(treeRoot, 1, "a");
+		assertThat(treeA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("a"), null, FieldChangeType.ADDED, null, null, Integer.MIN_VALUE, 2));
+		var treeA2 = findTreeItem(treeA, 1, "2");
+		assertThat(treeA2.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("2"), null, FieldChangeType.ADDED, null, null, Integer.MIN_VALUE, 3));
+		var treeA2AA = findTreeItem(treeA2, 0, "aa");
+		assertThat(treeA2AA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("aa"), 11, FieldChangeType.ADDED, null, 55, Integer.MIN_VALUE, 3));
+		
+		// tree node at frame 2 with onlyModified = false
+		treeRoot = vmap.getTreeNodeAt(new PrimitiveInterner(), new UnrealName("test"), 2, false);
+		assertThat(treeRoot.getChildren()).hasSize(1);
+		assertThat(treeRoot.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("test"), null, FieldChangeType.CHANGED, null, null, 1, 3));
+		treeA = findTreeItem(treeRoot, 2, "a");
+		assertThat(treeA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("a"), null, FieldChangeType.CHANGED, null, null, 1, 3));
+		var treeA1 = findTreeItem(treeA, 1, "1");
+		assertThat(treeA1.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("1"), null, FieldChangeType.ADDED, null, null, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		var treeA1AA = findTreeItem(treeA1, 0, "aa");
+		assertThat(treeA1AA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("aa"), 33, FieldChangeType.ADDED, null, null, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		treeA2 = findTreeItem(treeA, 1, "2");
+		assertThat(treeA2.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("2"), null, FieldChangeType.NONE, null, null, Integer.MIN_VALUE, 3));
+		treeA2AA = findTreeItem(treeA2, 0, "aa");
+		assertThat(treeA2AA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("aa"), 11, FieldChangeType.NONE, null, 55, Integer.MIN_VALUE, 3));
+		
+		// tree node at frame 2 with onlyModified = true
+		treeRoot = vmap.getTreeNodeAt(new PrimitiveInterner(), new UnrealName("test"), 2, true);
+		assertThat(treeRoot.getChildren()).hasSize(1);
+		assertThat(treeRoot.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("test"), null, FieldChangeType.CHANGED, null, null, 1, 3));
+		treeA = findTreeItem(treeRoot, 1, "a");
+		assertThat(treeA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("a"), null, FieldChangeType.CHANGED, null, null, 1, 3));
+		treeA1 = findTreeItem(treeA, 1, "1");
+		assertThat(treeA1.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("1"), null, FieldChangeType.ADDED, null, null, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		treeA1AA = findTreeItem(treeA1, 0, "aa");
+		assertThat(treeA1AA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("aa"), 33, FieldChangeType.ADDED, null, null, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		
+		// tree node at frame 3 with onlyModified = false
+		treeRoot = vmap.getTreeNodeAt(new PrimitiveInterner(), new UnrealName("test"), 3, false);
+		assertThat(treeRoot.getChildren()).hasSize(1);
+		assertThat(treeRoot.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("test"), null, FieldChangeType.CHANGED, null, null, 2, Integer.MAX_VALUE));
+		treeA = findTreeItem(treeRoot, 2, "a");
+		assertThat(treeA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("a"), null, FieldChangeType.CHANGED, null, null, 2, Integer.MAX_VALUE));
+		treeA1 = findTreeItem(treeA, 1, "1");
+		assertThat(treeA1.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("1"), null, FieldChangeType.NONE, null, null, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		treeA1AA = findTreeItem(treeA1, 0, "aa");
+		assertThat(treeA1AA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("aa"), 33, FieldChangeType.NONE, null, null, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		treeA2 = findTreeItem(treeA, 1, "2");
+		assertThat(treeA2.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("2"), null, FieldChangeType.CHANGED, null, null, 1, Integer.MAX_VALUE));
+		treeA2AA = findTreeItem(treeA2, 0, "aa");
+		assertThat(treeA2AA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("aa"), 55, FieldChangeType.CHANGED, 11, null, 1, Integer.MAX_VALUE));
+		
+		// tree node at frame 3 with onlyModified = true
+		treeRoot = vmap.getTreeNodeAt(new PrimitiveInterner(), new UnrealName("test"), 3, true);
+		assertThat(treeRoot.getChildren()).hasSize(1);
+		assertThat(treeRoot.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("test"), null, FieldChangeType.CHANGED, null, null, 2, Integer.MAX_VALUE));
+		treeA = findTreeItem(treeRoot, 1, "a");
+		assertThat(treeA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("a"), null, FieldChangeType.CHANGED, null, null, 2, Integer.MAX_VALUE));
+		treeA2 = findTreeItem(treeA, 1, "2");
+		assertThat(treeA2.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("2"), null, FieldChangeType.CHANGED, null, null, 1, Integer.MAX_VALUE));
+		treeA2AA = findTreeItem(treeA2, 0, "aa");
+		assertThat(treeA2AA.getValue()).usingRecursiveComparison().isEqualTo(new X2VersionedDatumTreeItem(
+				new UnrealName("aa"), 55, FieldChangeType.CHANGED, 11, null, 1, Integer.MAX_VALUE));
+	}
+	
+	@Test
 	public void testNestedStructs() {
 		var vmap = new X2VersionedMap(1);
 		var visitor = new VersionedObjectVisitor(new PrimitiveInterner());
