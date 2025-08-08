@@ -133,7 +133,7 @@ public class X2SaveGameReader {
 		buffer.position(buffer.position() + 4); // skip #13
 		header.language = UnrealUtils.readString(buffer);
 		buffer.position(buffer.position() + 16); // skip #15 through #18
-		header.campaignStartTime = LocalDateTime.parse(UnrealUtils.readString(buffer), DateTimeFormatter.ofPattern("yyyy.MM.dd-HH.mm.ss"));
+		var campaignStartTimeString = UnrealUtils.readString(buffer);
 		header.mapImage = UnrealUtils.readString(buffer);
 		header.name = UnrealUtils.readString(buffer);
 
@@ -141,6 +141,11 @@ public class X2SaveGameReader {
 		header.creationTime = LocalDateTime.parse(
 				creationTimeString,
 				DateTimeFormatter.ofPattern("CHN".equals(header.language) ? "y M d\nH:mm" : "M/d/y\nH:mm"));
+		
+		// campaign start time is omitted for TQL saves
+		if (!campaignStartTimeString.isEmpty()) {
+			header.campaignStartTime = LocalDateTime.parse(campaignStartTimeString, DateTimeFormatter.ofPattern("yyyy.MM.dd-HH.mm.ss"));
+		}
 		
 		int dlcCount = buffer.getInt();
 		header.installedDlcAndMods = new ArrayList<>(dlcCount);

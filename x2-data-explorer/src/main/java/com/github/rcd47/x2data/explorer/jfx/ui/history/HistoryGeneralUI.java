@@ -39,7 +39,9 @@ public class HistoryGeneralUI {
 			headers.add(new HeaderPair("Is ironman enabled", Boolean.toString(saveHeader.ironmanEnabled)));
 			headers.add(new HeaderPair("Is auto save", Boolean.toString(saveHeader.autoSave)));
 			headers.add(new HeaderPair("Language", saveHeader.language));
-			headers.add(new HeaderPair("Campaign start time", saveHeader.campaignStartTime.toString()));
+			if (saveHeader.campaignStartTime != null) {
+				headers.add(new HeaderPair("Campaign start time", saveHeader.campaignStartTime.toString()));
+			}
 			headers.add(new HeaderPair("Map image", saveHeader.mapImage));
 			headers.add(new HeaderPair("Name", saveHeader.name));
 			if (saveHeader.gameVersion != X2GameVersion.XCOM2) {
