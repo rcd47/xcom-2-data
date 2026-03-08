@@ -187,7 +187,7 @@ public class HistoryFileReader {
 					
 					var hotMapUpdates = objectsChangedInFrame.get(i);
 					if (hotMapUpdates.isEmpty()) {
-						frame.setObjectsHot(stateObjectsInFrameHot);
+						frame.setObjectsHot(parsedFrames[i - 1].getObjectsHot());
 					} else {
 						for (var changedObject : hotMapUpdates) {
 							stateObjectsInFrameHot.put(changedObject.getObjectId(), changedObject);
