@@ -36,6 +36,10 @@ public class HistoryFrame implements Comparable<HistoryFrame> {
 		this.objectsCold = objectsCold;
 	}
 
+	public Int2ReferenceOpenHashMap<GameStateObject> getObjectsHot() {
+		return objectsHot;
+	}
+
 	public void setObjectsHot(Int2ReferenceOpenHashMap<GameStateObject> objectsHot) {
 		this.objectsHot = objectsHot;
 	}
